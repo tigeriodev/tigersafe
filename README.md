@@ -8,12 +8,15 @@ It aims at storing sensitive data as securely as possible, keeping in mind that 
 This software currently has the following features:
  - **Store passwords (and additional data)** in a file encrypted with a single password, without an internet connection.
  - **Generate random passwords** with full customization options (minimum and maximum length, characters that can be used).
+   
    ![Random password generator example](doc/img/generate-random-password.png)
 
  - Store **TOTP tokens** (**2FA**, two-factor authentication used by most websites) and display current and next authentication codes.
+   
    ![TOTP codes example](doc/img/totp-codes.png)
 
  - **Review interface** for stored data changes that are not yet saved, displaying all additions, modifications and deletions of stored data, and allowing to cancel them when needed.
+   
    ![Review interface example](doc/img/review.png)
 
  - Edit mode and save action (required to apply all unsaved changes to the safe file) with a confirmation popup, **preventing accidental data loss**.

@@ -1,0 +1,462 @@
+.root {
+    -fx-selection-bar: #fed995;
+    -fx-focus-color: orange;
+    -fx-faint-focus-color: #ffa50022;
+    -fx-cell-focus-inner-border: -fx-background;
+}
+
+Button, CheckBox, ToggleButton, ComboBox {
+    -fx-cursor: hand;
+}
+
+.invalid-field {
+    -fx-focus-color: red;
+    -fx-border-color: red;
+    -fx-faint-focus-color: #ff000022;
+}
+
+.invalid-field-requirements {
+    -fx-border-color: red;
+    -fx-background-color: #fed5d5;
+    -fx-padding: 0 5 0 5;
+}
+
+.viewable-unclear-field-hbox {
+    -fx-spacing: 5;
+}
+
+.viewable-unclear-field-root-pane {
+    -fx-alignment: center;
+}
+
+.number-field-root-hbox {
+    -fx-spacing: 10;
+}
+
+.number-field-root-hbox > .text-field {
+    -fx-max-width: 50;
+    -fx-alignment: baseline-right;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
+    -fx-text-fill: black;
+    -fx-background: #fce9c5;
+    -fx-background-color: #fce9c5;
+}
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected,
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
+    -fx-background: -fx-selection-bar;
+    -fx-background-color: -fx-background;
+    -fx-background-insets: 0;
+}
+
+.optional-file-field-root-hbox {
+    -fx-spacing: 5
+}
+
+/* Safe selection */
+
+#safe-selection-root-grid {
+    -fx-min-width: 400;
+    -fx-min-height: 450;
+    -fx-alignment: center;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 25 25 25 25;
+}
+
+#safe-selection-root-grid > .tigersafe-title-hbox {
+    -fx-alignment: center;
+    -fx-padding: 0 0 10 0;
+}
+
+#safe-selection-root-grid > .tigersafe-title-hbox > .tigersafe-title {
+    -fx-font-size: 20;
+}
+
+#safe-selection-root-grid > .navigation-buttons-hbox {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+#safe-selection-root-grid .open-safe-title-hbox {
+    -fx-alignment: center;
+    -fx-padding: 10 0 10 0;
+}
+
+#safe-selection-root-grid .open-safe-title-hbox .open-safe-title {
+    -fx-font-size: 20;
+}
+
+#safe-selection-root-grid .open-safe-button-hbox {
+    -fx-alignment: center-right;
+}
+
+/* Safe creation */
+
+#safe-creation-root-grid {
+    -fx-min-width: 450;
+    -fx-min-height: 450;
+    -fx-alignment: center;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 25 25 25 25;
+}
+
+#safe-creation-root-grid > .create-safe-title-hbox {
+    -fx-alignment: center;
+    -fx-padding: 10 0 10 0;
+}
+
+#safe-creation-root-grid > .create-safe-title-hbox > .create-safe-title {
+    -fx-font-size: 20;
+}
+
+#safe-creation-root-grid .create-safe-button-hbox {
+    -fx-alignment: bottom-right;
+}
+
+/* Safe contents */
+
+#safe-contents-root-border-pane {
+    -fx-min-width: 900;
+    -fx-pref-width: 900;
+    -fx-min-height: 500;
+    -fx-pref-height: 500;
+}
+
+#safe-contents-header-hbox {
+    -fx-padding: 15 12 15 12;
+    -fx-spacing: 10;
+}
+
+#safe-contents-header-hbox .tab-button.selected-tab {
+    -fx-base: #fed995;
+    -fx-hover-base: -fx-base;
+    -fx-pressed-base: -fx-base;
+    -fx-shadow-highlight-color: -fx-base;
+    -fx-text-fill: -fx-dark-text-color;
+}
+
+#safe-contents-header-hbox .tab-button.selected-tab:focused {
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+    -fx-background-radius: 3px, 3px, 2px, 1px;
+}
+
+#safe-contents-unsaved-footer-hbox {
+    -fx-border-color: gray;
+    -fx-border-width: 2;
+    -fx-border-style: dashed none none none;
+    -fx-background-color: linear-gradient(to right, #ffc04c, darkorange);
+    -fx-padding: 5 10 5 10;
+    -fx-alignment: center-left;
+}
+
+#safe-contents-unsaved-footer-hbox .buttons-tile {
+    -fx-alignment: center-right;
+    -fx-hgap: 5;
+}
+
+/* Passwords tab */
+
+#safe-contents-passwords-root-hbox {
+    -fx-padding: 10 10 10 10;
+}
+
+#safe-contents-passwords-root-hbox > .left-vbox {
+    -fx-alignment: center;
+    -fx-spacing: 20;
+    -fx-padding: 0 5 0 5;
+}
+
+#safe-contents-passwords-root-hbox > .left-vbox > .filter-grid {
+    -fx-alignment: center;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 0 10 0 10;
+}
+
+#safe-contents-passwords-root-hbox .passwords-list .passwords-list-cell-vbox {
+    -fx-spacing: 10;
+}
+
+#safe-contents-passwords-root-hbox .passwords-list .passwords-list-cell-vbox .password-entry-site {
+    -fx-fill: darkcyan;
+    -fx-underline: true;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox {
+    -fx-alignment: center;
+    -fx-padding: 20 20 20 20;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox > .fields-grid {
+    -fx-alignment: center;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 0 0 20 0;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox > .fields-grid .password-buttons-tile {
+    -fx-alignment: center-right;
+    -fx-hgap: 5;
+    -fx-pref-width: 115;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox .totp-hbox {
+    -fx-alignment: center;
+    -fx-padding: 20 0 20 0;
+    -fx-spacing: 20;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox .totp-codes-hbox {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox .totp-codes-hbox .progress-vbox {
+    -fx-alignment: center;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox .totp-config-hbox {
+    -fx-alignment: center-left;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox .totp-config-hbox > .buttons-tile {
+    -fx-alignment: center-right;
+    -fx-hgap: 5;
+    -fx-pref-width: 77;
+}
+
+#safe-contents-passwords-root-hbox .password-root-vbox > .bottom-hbox {
+    -fx-alignment: center;
+    -fx-spacing: 30;
+}
+
+#safe-contents-generate-password-root-vbox {
+    -fx-min-width: 550;
+    -fx-min-height: 550;
+    -fx-alignment: center;
+    -fx-spacing: 10;
+    -fx-padding: 5 5 5 5;
+}
+
+#safe-contents-generate-password-root-vbox .alphabet-vbox .check-box {
+    -fx-padding: 5 0 5 0;
+}
+
+#safe-contents-generate-password-root-vbox .custom-alphabet-hbox {
+    -fx-alignment: center-left;
+    -fx-spacing: 10;
+}
+
+#safe-contents-generate-password-root-vbox .custom-alphabet-hbox .text-field {
+    -fx-min-width: 350;
+    -fx-pref-width: 350;
+    -fx-max-width: 350;
+}
+
+#safe-contents-generate-password-root-vbox .length-grid {
+    -fx-alignment: center;
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 5 5 5 5;
+}
+
+#safe-contents-generate-password-root-vbox .result-titled-pane {
+    -fx-padding: 25 0 25 0;
+}
+
+#safe-contents-generate-password-root-vbox .result-vbox {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+    -fx-padding: 5 5 5 5;
+}
+
+#safe-contents-generate-password-root-vbox .result-vbox .viewable-unclear-field-hbox {
+    -fx-alignment: center;
+}
+
+#safe-contents-generate-password-root-vbox .result-vbox .viewable-unclear-field-hbox .viewable-unclear-field-root-pane {
+    -fx-min-width: 350;
+    -fx-pref-width: 350;
+    -fx-max-width: 350;
+}
+
+/* Changes tab */
+
+#safe-contents-changes-root-vbox {
+    -fx-alignment: top-center;
+    -fx-spacing: 20;
+    -fx-padding: 5 10 5 10;
+}
+
+#safe-contents-changes-root-vbox .changes-scroll {
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+#safe-contents-changes-root-vbox .changes-vbox {
+    -fx-spacing: 10;
+}
+
+#safe-contents-changes-root-vbox .titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-effect: null;
+}
+
+#safe-contents-changes-root-vbox .added-password-entry .password-entry-content-root,
+#safe-contents-changes-root-vbox .deleted-password-entry .password-entry-content-root {
+    -fx-alignment: top-center;
+    -fx-spacing: 10;
+}
+
+#safe-contents-changes-root-vbox .password-entry .fields-grid {
+    -fx-hgap: 10;
+    -fx-vgap: 5;
+}
+
+#safe-contents-changes-root-vbox .deleted-password-entry {
+    -fx-border-color: #f9acac;
+}
+
+#safe-contents-changes-root-vbox .deleted-password-entry > .title {
+    -fx-background-color: #f9acac;
+}
+
+#safe-contents-changes-root-vbox .modified-password-entry {
+    -fx-border-color: #fed995;
+}
+
+#safe-contents-changes-root-vbox .modified-password-entry > .title {
+    -fx-background-color: #fed995;
+}
+
+#safe-contents-changes-root-vbox .added-password-entry {
+    -fx-border-color: lightgreen;
+}
+
+#safe-contents-changes-root-vbox .added-password-entry > .title {
+    -fx-background-color: lightgreen;
+}
+
+/* Config tab */
+
+#safe-contents-config-root-vbox {
+    -fx-alignment: top-center;
+    -fx-spacing: 20;
+    -fx-padding: 5 10 5 10;
+}
+
+#safe-contents-config-root-vbox .sections-scroll {
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+#safe-contents-config-root-vbox .sections-vbox {
+    -fx-spacing: 10;
+}
+
+#safe-contents-config-root-vbox .titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-effect: null;
+}
+
+#safe-contents-config-root-vbox .section-titled-pane .content-root {
+    -fx-alignment: top-center;
+    -fx-spacing: 10;
+}
+
+#safe-contents-config-root-vbox .section-titled-pane .content-root > .grid {
+    -fx-hgap: 10;
+    -fx-vgap: 5;
+}
+
+#safe-contents-config-root-vbox .section-titled-pane .content-root > .grid .viewable-unclear-field-root-pane {
+    -fx-min-width: 200;
+    -fx-pref-width: 200;
+    -fx-max-width: 200;
+}
+
+/* Import review popup */
+
+#safe-contents-import-review-root-vbox {
+    -fx-min-width: 550;
+    -fx-min-height: 550;
+    -fx-max-height: 750;
+    -fx-alignment: top-center;
+    -fx-spacing: 20;
+    -fx-padding: 5 10 5 10;
+}
+
+#safe-contents-import-review-root-vbox .elements-scroll {
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+#safe-contents-import-review-root-vbox .elements-vbox {
+    -fx-spacing: 10;
+}
+
+#safe-contents-import-review-root-vbox .titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-effect: null;
+}
+
+#safe-contents-import-review-root-vbox .password-entry-content-root {
+    -fx-alignment: top-center;
+    -fx-spacing: 10;
+}
+
+#safe-contents-import-review-root-vbox .password-entry-content-root .fields-grid {
+    -fx-hgap: 10;
+    -fx-vgap: 5;
+}
+
+/* Global config */
+
+#global-config-root-vbox {
+    -fx-min-width: 550;
+    -fx-pref-width: 550;
+    -fx-min-height: 450;
+    -fx-pref-height: 450;
+    -fx-alignment: center;
+    -fx-spacing: 30;
+    -fx-padding: 50 50 50 50;
+}
+
+#global-config-root-vbox > .close-button-hbox {
+    -fx-alignment: center-left;
+}
+
+#global-config-root-vbox > .global-config-title-hbox {
+    -fx-alignment: center;
+}
+
+#global-config-root-vbox > .global-config-title-hbox > .global-config-title {
+    -fx-font-size: 20;
+}
+
+#global-config-root-vbox .params-scroll {
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
+}
+
+#global-config-root-vbox .params-grid {
+    -fx-padding: 5 5 5 5;
+    -fx-hgap: 10;
+    -fx-vgap: 5;
+    -fx-alignment: center;
+}
+
+#global-config-root-vbox .params-grid .keyboard-shortcut-hbox {
+    -fx-spacing: 5;
+}
+
+#global-config-root-vbox .save-button-hbox {
+    -fx-alignment: center;
+}

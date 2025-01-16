@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.tigeriodev.tigersafe</groupId>
+        <artifactId>tigersafe</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>tigersafe-ui</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <javafx.maven.version>0.0.8</javafx.maven.version>
+
+        <javafx.version>21.0.4</javafx.version>
+
+        <tigersafe.globalConfigPath>${maven.multiModuleProjectDirectory}/tests/temp/global-config.properties</tigersafe.globalConfigPath>
+        <tigersafe.jreiName>tigersafeJREI</tigersafe.jreiName>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>jrei</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jrei-jlink</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>jlink</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jrei-legal</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${basedir}/target/${tigersafe.jreiName}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources</directory>
+                                            <includes>
+                                                <include>LICENSE</include>
+                                                <include>NOTICE</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>jrei-icon</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${basedir}/target/${tigersafe.jreiName}/bin</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${maven.multiModuleProjectDirectory}/install</directory>
+                                            <includes>
+                                                <include>tigersafeIcon.ico</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.graphics/com.sun.javafx.scene.text=fr.tigeriodev.tigersafe.ui</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.graphics/com.sun.javafx.geom=fr.tigeriodev.tigersafe.ui</arg>
+                        <arg>--add-exports</arg>
+                        <arg>javafx.graphics/com.sun.javafx.text=fr.tigeriodev.tigersafe.ui</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>${javafx.maven.version}</version>
+                <configuration>
+                    <mainClass>fr.tigeriodev.tigersafe.ui/fr.tigeriodev.tigersafe.ui.UIApp</mainClass>
+                    <commandlineArgs>-config ${tigersafe.globalConfigPath}</commandlineArgs>
+                    <options>
+                        <option>${tigersafe.runtime.jvmArgs}</option>
+                        <option>${tigersafe.jvmArgs}</option>
+                        <option>${tigersafe.core.jvmArgs}</option>
+                        <option>${tigersafe.ui.jvmArgs}</option>
+                    </options>
+                    <stripDebug>true</stripDebug>
+                    <noHeaderFiles>true</noHeaderFiles>
+                    <noManPages>true</noManPages>
+                    <launcher>tigersafeLauncher</launcher>
+                    <jlinkImageName>${tigersafe.jreiName}</jlinkImageName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.tigeriodev.tigersafe</groupId>
+            <artifactId>tigersafe-core</artifactId>
+            <version>${tigersafe.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,14 @@
+* text=auto
+
+*.png binary
+*.jpg binary
+
+*.md text diff=markdown
+*.xml text
+*.css text diff=css
+*.properties text
+*.java text diff=java
+
+*.sh text eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=lf

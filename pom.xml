@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.tigeriodev.tigersafe</groupId>
+    <artifactId>tigersafe</artifactId>
+    <version>0.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>TigerSafe</name>
+
+    <properties>
+        <tigersafe.version>${project.version}</tigersafe.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <maven.compiler.version>3.13.0</maven.compiler.version>
+        <maven.install.version>3.1.3</maven.install.version>
+        <maven.resources.version>3.3.1</maven.resources.version>
+
+        <tigersafe.core.jvmArgs>--add-opens=java.base/com.sun.crypto.provider=fr.tigeriodev.tigersafe.core --add-opens=java.base/javax.crypto.spec=fr.tigeriodev.tigersafe.core --add-opens=java.base/java.lang=fr.tigeriodev.tigersafe.core</tigersafe.core.jvmArgs>
+        <tigersafe.ui.jvmArgs>--add-opens=javafx.controls/javafx.scene.control=fr.tigeriodev.tigersafe.ui --add-opens=javafx.controls/javafx.scene.control=fr.tigeriodev.tigersafe.core --add-opens=javafx.base/com.sun.javafx.binding=fr.tigeriodev.tigersafe.ui --add-opens=javafx.graphics/com.sun.javafx.text=fr.tigeriodev.tigersafe.ui --add-opens=javafx.graphics/com.sun.javafx.text=fr.tigeriodev.tigersafe.core --add-opens=javafx.graphics/com.sun.javafx.scene.text=fr.tigeriodev.tigersafe.ui --add-opens=javafx.controls/javafx.scene.control.skin=fr.tigeriodev.tigersafe.core --add-opens=javafx.graphics/javafx.scene.text=fr.tigeriodev.tigersafe.core --add-opens=javafx.graphics/com.sun.javafx.geom=fr.tigeriodev.tigersafe.ui</tigersafe.ui.jvmArgs>
+
+        <tigersafe.logs.jvmArgs></tigersafe.logs.jvmArgs>
+        <tigersafe.jvmArgs>-XX:+UseG1GC ${tigersafe.logs.jvmArgs}</tigersafe.jvmArgs>
+        <tigersafe.runtime.jvmArgs>-Xms128m -Xmx128m -XX:+AlwaysPreTouch -XX:+DisableAttachMechanism</tigersafe.runtime.jvmArgs>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>unsafe-logs</id>
+            <properties>
+                <tigersafe.logs.jvmArgs>-Dtigersafe.logs=${maven.multiModuleProjectDirectory}/tests/logs.config -Dtigersafe.unsafeLoggers=true</tigersafe.logs.jvmArgs>
+            </properties>
+        </profile>
+        <profile>
+            <id>safe-logs</id>
+            <properties>
+                <tigersafe.logs.jvmArgs>-Dtigersafe.logs=${maven.multiModuleProjectDirectory}/tests/logs.config</tigersafe.logs.jvmArgs>
+            </properties>
+        </profile>
+    </profiles>
+
+    <modules>
+        <module>tigersafe-core</module>
+        <module>tigersafe-ui</module>
+        <module>tigersafe-tests</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven.install.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven.resources.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

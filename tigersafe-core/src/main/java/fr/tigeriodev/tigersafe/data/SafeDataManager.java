@@ -21,6 +21,7 @@ package fr.tigeriodev.tigersafe.data;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,43 +135,39 @@ public final class SafeDataManager implements Destroyable {
         GlobalConfig.ConfigCipher.USER_DATA.getCipher().waitWorkingCheck();
         
         Data[] pwEntriesData = getValidPwEntriesData();
+        SafeData safeData = new SafeData(pwEntriesData);
+        SafeFileManager.write(tempFile, safePw, safeData);
+        safeData.dispose();
+        SafeDataManager tempDM = new SafeDataManager(tempFile, safePw);
         try {
-            SafeData safeData = new SafeData(pwEntriesData);
-            SafeFileManager.write(tempFile, safePw, safeData);
-            safeData.dispose();
-            SafeDataManager tempDM = new SafeDataManager(tempFile, safePw);
-            try {
-                tempDM.loadSafeFile();
-                boolean isDataPersistent =
-                        Arrays.equals(tempDM.getValidPwEntriesData(), pwEntriesData);
-                if (!isDataPersistent) {
-                    unsafeLog.newChildFromCurMethIf(Level.ERROR)
-                            .error(
-                                    () -> "\n tempDM: "
-                                            + Arrays.toString(tempDM.getValidPwEntriesData())
-                                            + ",\n realDM: " + Arrays.toString(pwEntriesData) + "."
-                            );
-                    throw new IllegalStateException(
-                            "Password entries are not correctly written or loaded."
-                    );
-                }
-                
-                safeFile.delete();
-                Files.move(tempFile.toPath(), safeFile.toPath());
-            } finally {
-                try {
-                    tempDM.destroy();
-                } catch (Exception ex) {
-                    log.newChildFromCurMeth().error(() -> "Error while deleting temp dm: ", ex);
-                }
+            tempDM.loadSafeFile();
+            boolean isDataPersistent = Arrays.equals(tempDM.getValidPwEntriesData(), pwEntriesData);
+            if (!isDataPersistent) {
+                unsafeLog.newChildFromCurMethIf(Level.ERROR)
+                        .error(
+                                () -> "\n tempDM: "
+                                        + Arrays.toString(tempDM.getValidPwEntriesData())
+                                        + ",\n realDM: " + Arrays.toString(pwEntriesData) + "."
+                        );
+                throw new IllegalStateException(
+                        "Password entries are not correctly written or loaded."
+                );
             }
+        } catch (
+                IOException | GeneralSecurityException | DestroyFailedException
+                | RuntimeException ex
+        ) {
+            tempFile.delete();
+            throw ex;
         } finally {
             try {
-                tempFile.delete();
+                tempDM.destroy();
             } catch (Exception ex) {
-                log.newChildFromCurMeth().error(() -> "Error while deleting temp file: ", ex);
+                log.newChildFromCurMeth().error(() -> "Error while destroying temp dm: ", ex);
             }
         }
+        
+        Files.move(tempFile.toPath(), safeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
     
     public PasswordEntry[] getPwEntries() {

@@ -7,6 +7,9 @@ It aims at storing sensitive data as securely as possible, keeping in mind that 
 
 This software currently has the following features:
  - **Store passwords (and additional data)** in a file encrypted with a single password, without an internet connection.
+   
+   ![Stored passwords example](doc/img/passwords-example.png)
+
  - **Generate random passwords** with full customization options (minimum and maximum length, characters that can be used).
    
    ![Random password generator example](doc/img/generate-random-password.png)

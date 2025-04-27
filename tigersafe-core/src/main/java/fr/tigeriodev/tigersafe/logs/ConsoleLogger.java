@@ -24,7 +24,7 @@ public class ConsoleLogger extends Logger {
     
     // TODO could probably optimize with StringBuilder
     private static final String FORMAT =
-            "%1$tH:%1$tM:%1$tS.%1$tL | %2$s | %3$6.6s | %4$20.20s | %5$s %6$s%n";
+            "%1$tH:%1$tM:%1$tS.%1$tL | %2$s | %3$9.9s | %4$20.20s | %5$s %6$s%n";
     
     private final String displayName;
     

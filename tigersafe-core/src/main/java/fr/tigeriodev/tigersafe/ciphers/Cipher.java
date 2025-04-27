@@ -26,13 +26,18 @@ import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.SecretKey;
 
+import fr.tigeriodev.tigersafe.logs.Level;
+import fr.tigeriodev.tigersafe.logs.Logger;
+import fr.tigeriodev.tigersafe.logs.Logs;
 import fr.tigeriodev.tigersafe.utils.CheckUtils;
 
 public final class Cipher implements CipherImpl {
     
+    private static final Logger log = Logs.newLogger(Cipher.class);
+    
     public final String name;
     private final CipherImpl impl;
-    private WorkingStatus workingStatus = WorkingStatus.UNCHECKED;
+    private volatile WorkingStatus workingStatus = WorkingStatus.UNCHECKED;
     
     public Cipher(String name, CipherImpl impl) {
         this.name = name;
@@ -46,19 +51,57 @@ public final class Cipher implements CipherImpl {
         WORKING;
     }
     
-    public synchronized void checkWorkingAsync() {
-        if (workingStatus == WorkingStatus.UNCHECKED) {
+    public void checkWorkingAsync() {
+        if (workingStatus != WorkingStatus.UNCHECKED) {
+            return;
+        }
+        synchronized (impl) {
+            if (workingStatus != WorkingStatus.UNCHECKED) {
+                return;
+            }
             workingStatus = WorkingStatus.PENDING_CHECK;
-            CiphersManager.checkWorkingAsync(impl, name)
-                    .thenAccept(
-                            (isWorking) -> workingStatus =
-                                    isWorking ? WorkingStatus.WORKING : WorkingStatus.NOT_WORKING
-                    );
+            
+            log.debug(() -> "Start checking " + name + " cipher...");
+            Thread thread = new Thread(() -> {
+                boolean isWorking = false;
+                try {
+                    CipherImpl.checkWorking(impl);
+                    isWorking = true;
+                    log.debug(() -> name + " cipher is working");
+                } catch (Exception ex) {
+                    log.warn(() -> name + " cipher is not working: ", ex);
+                }
+                
+                synchronized (impl) {
+                    workingStatus = isWorking ? WorkingStatus.WORKING : WorkingStatus.NOT_WORKING;
+                    impl.notifyAll();
+                }
+            });
+            thread.start();
         }
     }
     
     public void waitWorkingCheck() {
-        CiphersManager.waitWorkingCheck(name);
+        if (isChecked()) {
+            return;
+        }
+        
+        Logger methLog = log.newChildFromCurMethIf(Level.DEBUG);
+        synchronized (impl) {
+            try {
+                while (isPendingCheck()) {
+                    methLog.debug(() -> name + " cipher is pending check, start waiting...");
+                    impl.wait();
+                    methLog.debug(() -> "wait end for " + name + " cipher");
+                }
+            } catch (InterruptedException ex) {
+                methLog.debug(() -> "interruption of waiting for " + name + " cipher", ex);
+            }
+        }
+    }
+    
+    public boolean isPendingCheck() {
+        return workingStatus == WorkingStatus.PENDING_CHECK;
     }
     
     public boolean isChecked() {

@@ -171,7 +171,7 @@ public class CiphersManagerTest extends TestClass {
         
         TestsLogs.runMuting(
                 new LogMessagePattern(
-                        CiphersManager.class,
+                        Cipher.class,
                         Level.WARN,
                         "notWorkingCipher cipher is not working"
                 ),

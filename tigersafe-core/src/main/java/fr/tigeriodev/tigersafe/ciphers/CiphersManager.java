@@ -21,25 +21,14 @@ package fr.tigeriodev.tigersafe.ciphers;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import fr.tigeriodev.tigersafe.logs.Level;
-import fr.tigeriodev.tigersafe.logs.Logger;
-import fr.tigeriodev.tigersafe.logs.Logs;
 
 public final class CiphersManager {
     
-    private static final Logger log = Logs.newLogger(CiphersManager.class);
     private static final Map<String, Cipher> CIPHERS_BY_NAME = new HashMap<>();
     private static final Set<String> CIPHERS_NAME;
     private static final Set<Cipher> CIPHERS;
-    private static final ExecutorService executor = Executors.newFixedThreadPool(2);
-    private static final Set<String> pendingWorkingCheckCiphersName = new HashSet<>();
     
     static {
         addCipher(new Cipher("AES_CTR", new AESCTR()));
@@ -81,68 +70,9 @@ public final class CiphersManager {
         return CIPHERS;
     }
     
-    public static void waitWorkingCheck(String cipherName) {
-        if (!pendingWorkingCheckCiphersName.contains(cipherName)) {
-            return;
-        }
-        Logger methLog = log.newChildFromCurMethIf(Level.DEBUG);
-        synchronized (pendingWorkingCheckCiphersName) {
-            try {
-                while (pendingWorkingCheckCiphersName.contains(cipherName)) {
-                    methLog.debug(() -> cipherName + " cipher is pending check, start waiting...");
-                    pendingWorkingCheckCiphersName.wait();
-                    methLog.debug(() -> "wait end for " + cipherName + " cipher");
-                }
-            } catch (InterruptedException ex) {
-                methLog.debug(() -> "interruption for " + cipherName + " cipher", ex);
-            }
-        }
-    }
-    
     public static void waitAllWorkingChecks() {
-        if (pendingWorkingCheckCiphersName.isEmpty()) {
-            return;
-        }
-        Logger methLog = log.newChildFromCurMethIf(Level.DEBUG);
-        synchronized (pendingWorkingCheckCiphersName) {
-            try {
-                while (!pendingWorkingCheckCiphersName.isEmpty()) {
-                    methLog.debug(() -> "there is a cipher pending check, start waiting...");
-                    pendingWorkingCheckCiphersName.wait();
-                    methLog.debug(() -> "wait end");
-                }
-            } catch (InterruptedException ex) {
-                methLog.debug(() -> "interruption", ex);
-            }
-        }
-    }
-    
-    public static CompletableFuture<Boolean> checkWorkingAsync(CipherImpl cipherImpl,
-            String cipherName) {
-        log.debug(() -> "Start checking " + cipherName + " cipher...");
-        pendingWorkingCheckCiphersName.add(cipherName);
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                CipherImpl.checkWorking(cipherImpl);
-                log.debug(() -> cipherName + " cipher is working");
-                return true;
-            } catch (Exception ex) {
-                log.warn(() -> cipherName + " cipher is not working: ", ex);
-                return false;
-            } finally {
-                pendingWorkingCheckCiphersName.remove(cipherName);
-                synchronized (pendingWorkingCheckCiphersName) {
-                    pendingWorkingCheckCiphersName.notifyAll();
-                }
-            }
-        }, executor);
-    }
-    
-    public static void stop() {
-        log.debug(() -> "stopped");
-        List<Runnable> notScheduled = executor.shutdownNow();
-        if (!notScheduled.isEmpty()) {
-            log.warn(() -> notScheduled.size() + " not scheduled tasks because of shutdown");
+        for (Cipher cipher : getCiphers()) {
+            cipher.waitWorkingCheck();
         }
     }
     

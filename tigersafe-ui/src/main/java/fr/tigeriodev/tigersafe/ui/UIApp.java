@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import fr.tigeriodev.tigersafe.GlobalConfig;
 import fr.tigeriodev.tigersafe.Lang;
 import fr.tigeriodev.tigersafe.MonitoringManager;
-import fr.tigeriodev.tigersafe.ciphers.CiphersManager;
 import fr.tigeriodev.tigersafe.data.SafeDataManager;
 import fr.tigeriodev.tigersafe.data.SafeFileManager;
 import fr.tigeriodev.tigersafe.logs.ConsoleLogger;
@@ -259,8 +258,6 @@ public final class UIApp extends Application {
             methLog.debug(() -> "failed to clear ui: ", ex);
             failedClearUI = true;
         }
-        
-        CiphersManager.stop();
         
         methLog.debug(() -> MemUtils.getMemDebug() + ", first clearHeap()");
         MemUtils.clearHeap(CLEAR_HEAP_MARGIN_BYTES);

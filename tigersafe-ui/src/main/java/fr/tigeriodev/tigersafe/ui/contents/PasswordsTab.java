@@ -824,7 +824,7 @@ public class PasswordsTab extends SafeContentsUI.Tab {
                 static final int MIN_LEN = 1;
                 static final int MAX_LEN = 10000;
                 static final int[] LEN_BTNS_REL_ADD = new int[] {
-                        -10, -1, 1, 10
+                        -10, -5, -1, 1, 5, 10
                 };
                 
                 final Stage stage;

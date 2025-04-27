@@ -736,6 +736,17 @@ public class PasswordsTab extends SafeContentsUI.Tab {
                 
                 totpTimeline.play();
                 
+                UIUtils.setButtonShortcut(
+                        ui.getScene(),
+                        UIConfig.KeyboardShortcut.COPY_CURRENT_TOTP.getKeyCombination(),
+                        curCodeCopyBtn
+                );
+                UIUtils.setButtonShortcut(
+                        ui.getScene(),
+                        UIConfig.KeyboardShortcut.COPY_NEXT_TOTP.getKeyCombination(),
+                        nextCodeCopyBtn
+                );
+                
                 return res;
             }
             
@@ -1046,6 +1057,12 @@ public class PasswordsTab extends SafeContentsUI.Tab {
                 success = MemUtils.tryDestroy(siteField) && success;
                 success = MemUtils.tryDestroy(infoField) && success;
                 
+                ObservableMap<KeyCombination, Runnable> accelerators =
+                        ui.getScene().getAccelerators();
+                accelerators
+                        .remove(UIConfig.KeyboardShortcut.COPY_CURRENT_TOTP.getKeyCombination());
+                accelerators.remove(UIConfig.KeyboardShortcut.COPY_NEXT_TOTP.getKeyCombination());
+                
                 if (!success) {
                     throw new DestroyFailedException();
                 }
@@ -1102,6 +1119,8 @@ public class PasswordsTab extends SafeContentsUI.Tab {
         accelerators.remove(UIConfig.KeyboardShortcut.ADD.getKeyCombination());
         accelerators.remove(UIConfig.KeyboardShortcut.EDIT_MODE.getKeyCombination());
         accelerators.remove(UIConfig.KeyboardShortcut.COPY_PASSWORD.getKeyCombination());
+        accelerators.remove(UIConfig.KeyboardShortcut.COPY_CURRENT_TOTP.getKeyCombination());
+        accelerators.remove(UIConfig.KeyboardShortcut.COPY_NEXT_TOTP.getKeyCombination());
         
         if (contentH != null) {
             UIUtils.tryDestroy(contentH);

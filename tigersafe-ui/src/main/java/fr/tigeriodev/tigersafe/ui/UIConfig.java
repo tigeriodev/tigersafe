@@ -62,6 +62,8 @@ public final class UIConfig {
         ADD("add"),
         EDIT_MODE("editMode"),
         COPY_PASSWORD("copyPassword"),
+        COPY_CURRENT_TOTP("copyCurrentTOTP"),
+        COPY_NEXT_TOTP("copyNextTOTP"),
         PASSWORDS_TAB("passwordsTab"),
         CONFIG_TAB("configTab");
         

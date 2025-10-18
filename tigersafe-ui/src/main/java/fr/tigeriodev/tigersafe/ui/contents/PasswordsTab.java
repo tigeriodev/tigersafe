@@ -18,8 +18,6 @@
 
 package fr.tigeriodev.tigersafe.ui.contents;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.Period;
 import java.time.ZoneOffset;
@@ -32,25 +30,20 @@ import java.util.Set;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 
-import fr.tigeriodev.tigersafe.GlobalConfig;
 import fr.tigeriodev.tigersafe.Lang;
 import fr.tigeriodev.tigersafe.data.NewPasswordEntry;
 import fr.tigeriodev.tigersafe.data.PasswordEntry;
 import fr.tigeriodev.tigersafe.data.TOTP;
 import fr.tigeriodev.tigersafe.logs.Logger;
 import fr.tigeriodev.tigersafe.logs.Logs;
-import fr.tigeriodev.tigersafe.ui.UIApp;
 import fr.tigeriodev.tigersafe.ui.UIConfig;
 import fr.tigeriodev.tigersafe.ui.UIUtils;
 import fr.tigeriodev.tigersafe.ui.fields.DestroyableTextArea;
 import fr.tigeriodev.tigersafe.ui.fields.DestroyableTextField;
-import fr.tigeriodev.tigersafe.ui.fields.NumberField;
 import fr.tigeriodev.tigersafe.ui.fields.ViewableUnclearField;
 import fr.tigeriodev.tigersafe.utils.CheckUtils;
 import fr.tigeriodev.tigersafe.utils.DatetimeUtils;
 import fr.tigeriodev.tigersafe.utils.MemUtils;
-import fr.tigeriodev.tigersafe.utils.MutableString;
-import fr.tigeriodev.tigersafe.utils.RandomUtils;
 import fr.tigeriodev.tigersafe.utils.StringUtils;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -61,7 +54,6 @@ import javafx.collections.ObservableMap;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -72,7 +64,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -84,8 +75,6 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class PasswordsTab extends SafeContentsUI.Tab {
@@ -391,7 +380,7 @@ public class PasswordsTab extends SafeContentsUI.Tab {
             final DestroyableTextArea infoField;
             ViewableUnclearField uriField;
             Timeline totpTimeline;
-            GeneratePasswordPopupHolder genPwPopupH;
+            GeneratePasswordPopup genPwPopup;
             
             PasswordPaneHolder(PasswordEntry pwEntry) {
                 rootVBox = new VBox();
@@ -548,19 +537,19 @@ public class PasswordsTab extends SafeContentsUI.Tab {
                 });
                 
                 pwGenerateBtn.setOnAction((e) -> {
-                    if (genPwPopupH != null) {
+                    if (genPwPopup != null) {
                         throw new IllegalStateException();
                     }
-                    genPwPopupH = new GeneratePasswordPopupHolder();
-                    genPwPopupH.showAndWait();
-                    if (genPwPopupH.isValidated) {
+                    genPwPopup = new GeneratePasswordPopup();
+                    genPwPopup.showAndWait();
+                    if (genPwPopup.isValidated()) {
                         if (!editModeCheckbox.isSelected()) {
                             editModeCheckbox.setSelected(true);
                         }
-                        pwField.setVal(genPwPopupH.resultField.getVal());
+                        pwField.setVal(genPwPopup.getResultField().getVal());
                     }
-                    UIUtils.tryDestroy(genPwPopupH);
-                    genPwPopupH = null;
+                    UIUtils.tryDestroy(genPwPopup);
+                    genPwPopup = null;
                 });
                 
                 siteField.editableProperty().bind(editModeCheckbox.selectedProperty());
@@ -813,233 +802,6 @@ public class PasswordsTab extends SafeContentsUI.Tab {
                 return res;
             }
             
-            private static class GeneratePasswordPopupHolder implements Destroyable {
-                
-                private static final Logger popupLog =
-                        Logs.newLogger(GeneratePasswordPopupHolder.class);
-                static final String POPUP_LANG_BASE =
-                        "SafeContentsUI.passwordEntry.password.generate.popup";
-                static final String ALPHABET_LANG_BASE = POPUP_LANG_BASE + ".alphabet";
-                static final String LENGTH_LANG_BASE = POPUP_LANG_BASE + ".length";
-                static final int MIN_LEN = 1;
-                static final int MAX_LEN = 10000;
-                static final int[] LEN_BTNS_REL_ADD = new int[] {
-                        -10, -5, -1, 1, 5, 10
-                };
-                
-                final Stage stage;
-                final Scene scene;
-                final ViewableUnclearField resultField;
-                boolean isValidated = false;
-                
-                private GeneratePasswordPopupHolder() {
-                    VBox rootVBox = new VBox();
-                    rootVBox.setId("safe-contents-generate-password-root-vbox");
-                    
-                    TitledPane alphabetTitledP = new TitledPane();
-                    alphabetTitledP.setText(Lang.get(ALPHABET_LANG_BASE + ".title"));
-                    alphabetTitledP.setCollapsible(false);
-                    
-                    VBox alphabetVBox = new VBox();
-                    alphabetVBox.getStyleClass().add("alphabet-vbox");
-                    
-                    CheckBox lowerLettersCheckB =
-                            new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".lowercaseLetters"));
-                    CheckBox upperLettersCheckB =
-                            new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".uppercaseLetters"));
-                    CheckBox digitsCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".digits"));
-                    
-                    HBox customHBox = new HBox();
-                    customHBox.getStyleClass().add("custom-alphabet-hbox");
-                    
-                    CheckBox customCheckB =
-                            new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".customChars"));
-                    TextField customTextF = new TextField();
-                    
-                    customHBox.getChildren().addAll(customCheckB, customTextF);
-                    
-                    alphabetVBox.getChildren()
-                            .addAll(
-                                    lowerLettersCheckB,
-                                    upperLettersCheckB,
-                                    digitsCheckB,
-                                    customHBox
-                            );
-                    
-                    alphabetTitledP.setContent(alphabetVBox);
-                    
-                    TitledPane lengthTitledP = new TitledPane();
-                    lengthTitledP.setText(Lang.get(LENGTH_LANG_BASE + ".title"));
-                    lengthTitledP.setCollapsible(false);
-                    
-                    GridPane lengthGrid = new GridPane();
-                    lengthGrid.getStyleClass().add("length-grid");
-                    
-                    // Max before min to be able to type max=40 then min=20, otherwise typing min=20 then max=40 would be processed as min=20 then max=4 which would trigger min=4
-                    NumberField maxLenField = new NumberField(MIN_LEN, MAX_LEN, LEN_BTNS_REL_ADD);
-                    UIUtils.addNodeToGrid(
-                            lengthGrid,
-                            0,
-                            LENGTH_LANG_BASE + ".max",
-                            maxLenField.rootHBox,
-                            false
-                    );
-                    
-                    NumberField minLenField = new NumberField(MIN_LEN, MAX_LEN, LEN_BTNS_REL_ADD);
-                    UIUtils.addNodeToGrid(
-                            lengthGrid,
-                            1,
-                            LENGTH_LANG_BASE + ".min",
-                            minLenField.rootHBox,
-                            false
-                    );
-                    
-                    lengthTitledP.setContent(lengthGrid);
-                    
-                    Button generateBtn = UIUtils.newBtn(
-                            POPUP_LANG_BASE + ".generate.button",
-                            "generate-password",
-                            true,
-                            false
-                    );
-                    
-                    TitledPane resultTitledP = new TitledPane();
-                    resultTitledP.setText(Lang.get(POPUP_LANG_BASE + ".result.title"));
-                    resultTitledP.setCollapsible(false);
-                    resultTitledP.getStyleClass().add("result-titled-pane");
-                    
-                    VBox resultVBox = new VBox();
-                    resultVBox.getStyleClass().add("result-vbox");
-                    
-                    resultField = new ViewableUnclearField(new MutableString.Simple());
-                    HBox resultPwHBox = UIUtils.newViewableUnclearFieldHBox(resultField);
-                    
-                    Button validateBtn =
-                            new Button(Lang.get(POPUP_LANG_BASE + ".result.validate.button.text"));
-                    
-                    resultVBox.getChildren().addAll(resultPwHBox, validateBtn);
-                    
-                    resultTitledP.setContent(resultVBox);
-                    
-                    Button cancelBtn = UIUtils
-                            .newBtn(POPUP_LANG_BASE + ".cancel.button", "cancel", true, false);
-                    
-                    rootVBox.getChildren()
-                            .addAll(
-                                    alphabetTitledP,
-                                    lengthTitledP,
-                                    generateBtn,
-                                    resultTitledP,
-                                    cancelBtn
-                            );
-                    
-                    scene = new Scene(rootVBox);
-                    
-                    stage = new Stage();
-                    stage.setTitle(Lang.get(POPUP_LANG_BASE + ".title"));
-                    stage.initModality(Modality.APPLICATION_MODAL);
-                    UIUtils.setAppIcon(stage);
-                    
-                    // Dynamic
-                    
-                    lowerLettersCheckB.setSelected(true);
-                    upperLettersCheckB.setSelected(true);
-                    digitsCheckB.setSelected(true);
-                    
-                    customTextF.textProperty().isEmpty().addListener((ov, oldEmpty, newEmpty) -> {
-                        customCheckB.setSelected(!newEmpty);
-                    });
-                    
-                    minLenField.valChangeNotifier.addListener(() -> {
-                        if (maxLenField.getVal() < minLenField.getVal()) {
-                            maxLenField.setVal(minLenField.getVal(), false);
-                        }
-                    });
-                    maxLenField.valChangeNotifier.addListener(() -> {
-                        if (minLenField.getVal() > maxLenField.getVal()) {
-                            minLenField.setVal(maxLenField.getVal(), false);
-                        }
-                    });
-                    
-                    generateBtn.setOnAction((e) -> {
-                        StringBuilder alphabetSB = new StringBuilder();
-                        if (lowerLettersCheckB.isSelected()) {
-                            alphabetSB.append("abcdefghijklmnopqrstuvwxyz");
-                        }
-                        if (upperLettersCheckB.isSelected()) {
-                            alphabetSB.append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-                        }
-                        if (digitsCheckB.isSelected()) {
-                            alphabetSB.append("0123456789");
-                        }
-                        if (customCheckB.isSelected()) {
-                            alphabetSB.append(customTextF.getText());
-                        }
-                        
-                        String alphabet = alphabetSB.toString();
-                        popupLog.debug(() -> "alphabet = " + alphabet);
-                        
-                        if (!StringUtils.containsUniqueChars(alphabet)) {
-                            Alert errorPopup = new Alert(
-                                    AlertType.ERROR,
-                                    Lang.get(POPUP_LANG_BASE + ".generate.error.duplicateChars"),
-                                    ButtonType.OK
-                            );
-                            UIUtils.showDialogAndWait(errorPopup);
-                            return;
-                        }
-                        try {
-                            char[] resChars = RandomUtils.newRandomChars(
-                                    minLenField.getVal(),
-                                    maxLenField.getVal(),
-                                    alphabet
-                            );
-                            resultField.setVal(resChars);
-                            MemUtils.clearCharArray(resChars);
-                            
-                            GlobalConfig conf = GlobalConfig.getInstance();
-                            conf.setPwGenerationMinLen(minLenField.getVal());
-                            conf.setPwGenerationMaxLen(maxLenField.getVal());
-                            if (customCheckB.isSelected()) {
-                                conf.setPwGenerationCustomChars(customTextF.getText());
-                            }
-                            conf.updateUserFile();
-                        } catch (NoSuchAlgorithmException | IOException ex) {
-                            UIApp.getInstance().showError(ex);
-                        }
-                    });
-                    
-                    validateBtn.setOnAction((e) -> {
-                        isValidated = true;
-                        stage.close();
-                    });
-                    
-                    cancelBtn.setOnAction((e) -> {
-                        stage.close();
-                    });
-                    
-                    GlobalConfig conf = GlobalConfig.getInstance();
-                    minLenField.setVal(conf.getPwGenerationMinLen(), false);
-                    maxLenField.setVal(conf.getPwGenerationMaxLen(), false);
-                    customTextF.setText(conf.getPwGenerationCustomChars());
-                }
-                
-                void showAndWait() {
-                    UIUtils.showSceneAndWait(scene, stage);
-                }
-                
-                @Override
-                public void destroy() throws DestroyFailedException {
-                    MemUtils.tryDestroy(resultField);
-                }
-                
-                @Override
-                public boolean isDestroyed() {
-                    return resultField.isDestroyed();
-                }
-                
-            }
-            
             @Override
             public void destroy() throws DestroyFailedException {
                 boolean success = true;
@@ -1050,8 +812,8 @@ public class PasswordsTab extends SafeContentsUI.Tab {
                 if (uriField != null) {
                     success = MemUtils.tryDestroy(uriField) && success;
                 }
-                if (genPwPopupH != null) {
-                    success = MemUtils.tryDestroy(genPwPopupH) && success;
+                if (genPwPopup != null) {
+                    success = MemUtils.tryDestroy(genPwPopup) && success;
                 }
                 success = MemUtils.tryDestroy(nameField) && success;
                 success = MemUtils.tryDestroy(siteField) && success;

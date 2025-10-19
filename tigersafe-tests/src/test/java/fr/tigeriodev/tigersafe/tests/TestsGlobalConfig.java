@@ -28,7 +28,7 @@ public final class TestsGlobalConfig {
     
     public static void resetForTest() throws IOException {
         File userGlobalConfigFile = TestsUtils.newTestFile("global-config.properties");
-        TestsGlobalConfig.initForTest(userGlobalConfigFile);
+        initForTest(userGlobalConfigFile);
     }
     
     public static void initForTest(File userGlobalConfigFile) throws IOException {

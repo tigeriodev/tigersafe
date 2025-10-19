@@ -20,6 +20,8 @@ package fr.tigeriodev.tigersafe.ui.contents;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
@@ -30,8 +32,10 @@ import fr.tigeriodev.tigersafe.logs.Logger;
 import fr.tigeriodev.tigersafe.logs.Logs;
 import fr.tigeriodev.tigersafe.ui.UIApp;
 import fr.tigeriodev.tigersafe.ui.UIUtils;
+import fr.tigeriodev.tigersafe.ui.fields.EditableComboBox;
 import fr.tigeriodev.tigersafe.ui.fields.NumberField;
 import fr.tigeriodev.tigersafe.ui.fields.ViewableUnclearField;
+import fr.tigeriodev.tigersafe.utils.CheckUtils;
 import fr.tigeriodev.tigersafe.utils.MemUtils;
 import fr.tigeriodev.tigersafe.utils.MutableString;
 import fr.tigeriodev.tigersafe.utils.RandomUtils;
@@ -42,7 +46,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -52,7 +55,7 @@ import javafx.stage.Stage;
 
 public class GeneratePasswordPopup implements Destroyable {
     
-    private static final Logger popupLog = Logs.newLogger(GeneratePasswordPopup.class);
+    private static final Logger log = Logs.newLogger(GeneratePasswordPopup.class);
     static final String POPUP_LANG_BASE = "SafeContentsUI.passwordEntry.password.generate.popup";
     static final String ALPHABET_LANG_BASE = POPUP_LANG_BASE + ".alphabet";
     static final String LENGTH_LANG_BASE = POPUP_LANG_BASE + ".length";
@@ -85,12 +88,12 @@ public class GeneratePasswordPopup implements Destroyable {
         CheckBox digitsCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".digits"));
         
         HBox customHBox = new HBox();
-        customHBox.getStyleClass().add("custom-alphabet-hbox");
+        customHBox.getStyleClass().add("custom-chars-hbox");
         
         CheckBox customCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".customChars"));
-        TextField customTextF = new TextField();
+        EditableComboBox customComboBox = new EditableComboBox();
         
-        customHBox.getChildren().addAll(customCheckB, customTextF);
+        customHBox.getChildren().addAll(customCheckB, customComboBox);
         
         alphabetVBox.getChildren()
                 .addAll(lowerLettersCheckB, upperLettersCheckB, digitsCheckB, customHBox);
@@ -164,8 +167,10 @@ public class GeneratePasswordPopup implements Destroyable {
         upperLettersCheckB.setSelected(true);
         digitsCheckB.setSelected(true);
         
-        customTextF.textProperty().isEmpty().addListener((ov, oldEmpty, newEmpty) -> {
-            customCheckB.setSelected(!newEmpty);
+        customComboBox.valueProperty().addListener((ov, oldCustomChars, newCustomChars) -> {
+            if (CheckUtils.isNotEmpty(newCustomChars)) {
+                customCheckB.setSelected(true);
+            } // else keep checkbox as is, particularly useful in case the user wants to delete all saved customChars
         });
         
         minLenField.valChangeNotifier.addListener(() -> {
@@ -191,11 +196,14 @@ public class GeneratePasswordPopup implements Destroyable {
                 alphabetSB.append("0123456789");
             }
             if (customCheckB.isSelected()) {
-                alphabetSB.append(customTextF.getText());
+                String customChars = customComboBox.getValue();
+                if (customChars != null) {
+                    alphabetSB.append(customChars);
+                }
             }
             
             String alphabet = alphabetSB.toString();
-            popupLog.debug(() -> "alphabet = " + alphabet);
+            log.debug(() -> "alphabet = " + alphabet);
             
             if (!StringUtils.containsUniqueChars(alphabet)) {
                 Alert errorPopup = new Alert(
@@ -211,20 +219,29 @@ public class GeneratePasswordPopup implements Destroyable {
                         .newRandomChars(minLenField.getVal(), maxLenField.getVal(), alphabet);
                 resultField.setVal(resChars);
                 MemUtils.clearCharArray(resChars);
-                
-                GlobalConfig conf = GlobalConfig.getInstance();
-                conf.setPwGenerationMinLen(minLenField.getVal());
-                conf.setPwGenerationMaxLen(maxLenField.getVal());
-                if (customCheckB.isSelected()) {
-                    conf.setPwGenerationCustomChars(customTextF.getText());
-                }
-                conf.updateUserFile();
-            } catch (NoSuchAlgorithmException | IOException ex) {
+            } catch (NoSuchAlgorithmException ex) {
                 UIApp.getInstance().showError(ex);
             }
         });
         
         validateBtn.setOnAction((e) -> {
+            try {
+                GlobalConfig conf = GlobalConfig.getInstance();
+                conf.setPwGenerationMinLen(minLenField.getVal());
+                conf.setPwGenerationMaxLen(maxLenField.getVal());
+                
+                if (customCheckB.isSelected()) {
+                    Set<String> customCharsSet = new LinkedHashSet<>(customComboBox.getItems());
+                    String customChars = customComboBox.getValue();
+                    if (CheckUtils.isNotEmpty(customChars)) {
+                        customCharsSet.add(customChars);
+                    }
+                    conf.setPwGenerationCustomChars(customCharsSet);
+                }
+                conf.updateUserFile();
+            } catch (IOException ex) {
+                UIApp.getInstance().showError(ex);
+            }
             isValidated = true;
             stage.close();
         });
@@ -236,7 +253,8 @@ public class GeneratePasswordPopup implements Destroyable {
         GlobalConfig conf = GlobalConfig.getInstance();
         minLenField.setVal(conf.getPwGenerationMinLen(), false);
         maxLenField.setVal(conf.getPwGenerationMaxLen(), false);
-        customTextF.setText(conf.getPwGenerationCustomChars());
+        customComboBox.getItems().setAll(conf.getPwGenerationCustomChars());
+        customComboBox.setValToFirstItem();
     }
     
     void showAndWait() {

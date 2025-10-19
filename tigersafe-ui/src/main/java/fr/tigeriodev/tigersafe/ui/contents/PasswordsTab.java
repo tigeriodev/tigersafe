@@ -73,7 +73,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -742,7 +741,7 @@ public class PasswordsTab extends SafeContentsUI.Tab {
             private static TextField newTOTPCodeField(TOTP totp) {
                 TextField res = new TextField();
                 res.setEditable(false);
-                res.setFont(Font.font("monospace", Font.getDefault().getSize()));
+                res.getStyleClass().add("totp-code");
                 res.setPrefColumnCount(totp.digitsNum);
                 return res;
             }

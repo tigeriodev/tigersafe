@@ -5,6 +5,11 @@
     -fx-cell-focus-inner-border: -fx-background;
 }
 
+.text-field {
+    -fx-font-family: 'Consolas';
+    -fx-font-size: 13;
+}
+
 Button, CheckBox, ToggleButton, ComboBox {
     -fx-cursor: hand;
 }
@@ -25,6 +30,10 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-spacing: 5;
 }
 
+.viewable-unclear-field-hbox .text-field {
+    -fx-min-width: 160;
+}
+
 .viewable-unclear-field-root-pane {
     -fx-alignment: center;
 }
@@ -34,7 +43,9 @@ Button, CheckBox, ToggleButton, ComboBox {
 }
 
 .number-field-root-hbox > .text-field {
-    -fx-max-width: 50;
+    -fx-min-width: 52;
+    -fx-max-width: 52;
+    -fx-pref-width: 52;
     -fx-alignment: baseline-right;
 }
 
@@ -50,8 +61,35 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-background-insets: 0;
 }
 
+.editable-combobox .combo-box-popup .combobox-item-label {
+    -fx-alignment: center-left;
+    -fx-padding: 0 8 0 8;
+}
+
+.editable-combobox .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-padding: 0 0 0 0;
+}
+
 .optional-file-field-root-hbox {
     -fx-spacing: 5
+}
+
+.icon-button {
+    -fx-background-color: transparent, transparent, transparent, transparent, transparent;
+    -fx-pref-height: 30;
+    -fx-pref-width: 30;
+    -fx-min-height: 30;
+    -fx-min-width: 30;
+    -fx-max-height: 30;
+    -fx-max-width: 30;
+}
+
+.icon-button:pressed,
+.icon-button:focused,
+.icon-button:hover,
+.icon-button-imgv:hover,
+.icon-button-imgv:hover {
+    -fx-background-color: -fx-focus-color;
 }
 
 /* Safe selection */
@@ -86,6 +124,10 @@ Button, CheckBox, ToggleButton, ComboBox {
 
 #safe-selection-root-grid .open-safe-title-hbox .open-safe-title {
     -fx-font-size: 20;
+}
+
+#safe-selection-root-grid .text-field {
+    -fx-min-width: 160;
 }
 
 #safe-selection-root-grid .open-safe-button-hbox {
@@ -177,6 +219,10 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-padding: 0 10 0 10;
 }
 
+#safe-contents-passwords-root-hbox > .left-vbox > .filter-grid .text-field {
+    -fx-min-width: 160;
+}
+
 #safe-contents-passwords-root-hbox .passwords-list .passwords-list-cell-vbox {
     -fx-spacing: 10;
 }
@@ -246,15 +292,17 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-padding: 5 0 5 0;
 }
 
-#safe-contents-generate-password-root-vbox .custom-alphabet-hbox {
+#safe-contents-generate-password-root-vbox .custom-chars-hbox {
     -fx-alignment: center-left;
     -fx-spacing: 10;
 }
 
-#safe-contents-generate-password-root-vbox .custom-alphabet-hbox .text-field {
+#safe-contents-generate-password-root-vbox .custom-chars-hbox .editable-combobox {
     -fx-min-width: 350;
     -fx-pref-width: 350;
     -fx-max-width: 350;
+    -fx-font-family: 'Consolas';
+    -fx-font-size: 13;
 }
 
 #safe-contents-generate-password-root-vbox .length-grid {
@@ -427,6 +475,10 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-alignment: center;
     -fx-spacing: 30;
     -fx-padding: 50 50 50 50;
+}
+
+#global-config-root-vbox .text-field {
+    -fx-min-width: 160;
 }
 
 #global-config-root-vbox > .close-button-hbox {

@@ -24,16 +24,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import fr.tigeriodev.tigersafe.ciphers.Cipher;
 import fr.tigeriodev.tigersafe.ciphers.CiphersManager;
 import fr.tigeriodev.tigersafe.utils.CheckUtils;
 
 public final class GlobalConfig {
+    
+    private static final int ENCODING_STR_COL_RADIX = 32;
     
     private static GlobalConfig instance = null;
     private static boolean isTest = false;
@@ -256,12 +261,14 @@ public final class GlobalConfig {
         setProp("PasswordGeneration.maxLength", Integer.toString(newVal));
     }
     
-    public String getPwGenerationCustomChars() {
-        return getProp("PasswordGeneration.customChars");
+    public Set<String> getPwGenerationCustomChars() {
+        Set<String> res = new LinkedHashSet<>();
+        decodeStrCol(getProp("PasswordGeneration.customChars"), res);
+        return res;
     }
     
-    public void setPwGenerationCustomChars(String newVal) {
-        setProp("PasswordGeneration.customChars", newVal);
+    public void setPwGenerationCustomChars(Set<String> newVal) {
+        setProp("PasswordGeneration.customChars", encodeStrCol(newVal));
     }
     
     public String getProp(String key) {
@@ -277,6 +284,66 @@ public final class GlobalConfig {
             return;
         }
         props.store(new FileWriter(userFile), null);
+    }
+    
+    /**
+     * Encodes a collection of strings, preserving the order.
+     * @param col collection of strings of length in [0; 1023]
+     * @return
+     */
+    public static String encodeStrCol(Collection<String> col) {
+        StringBuilder res = new StringBuilder();
+        for (String str : col) {
+            int strLen = str.length();
+            if (strLen > 1023) {
+                throw new UnsupportedOperationException("Cannot encode string of length > 1023.");
+            }
+            String encodedStrLen = Integer.toUnsignedString(strLen, ENCODING_STR_COL_RADIX);
+            if (encodedStrLen.length() == 1) {
+                res.append("0");
+            }
+            res.append(encodedStrLen);
+            res.append(str);
+        }
+        return res.toString();
+    }
+    
+    /**
+     * Decodes a collection of strings encoded by {@link #encodeStrCol(Collection)}, preserving the order.
+     * @param encodedCol encoded by {@link #encodeStrCol(Collection)}
+     * @param res the collection to fill with the encoded strings in {@code encodedCol}
+     */
+    public static void decodeStrCol(String encodedCol, Collection<String> res) {
+        if (!res.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+        int ind = 0;
+        int encodedColLen = encodedCol.length();
+        while (ind < encodedColLen) {
+            int strStartInd = ind + 2;
+            if (strStartInd > encodedColLen) {
+                throw new IllegalArgumentException(
+                        "Invalid encoded collection of strings (missing a string length)."
+                );
+            }
+            String encodedStrLen = encodedCol.substring(ind, strStartInd);
+            if (encodedStrLen.startsWith("0")) {
+                encodedStrLen = encodedStrLen.substring(1);
+            }
+            int strLen = Integer.parseUnsignedInt(encodedStrLen, ENCODING_STR_COL_RADIX);
+            if (strLen < 0) {
+                throw new IllegalArgumentException(
+                        "Invalid encoded collection of strings (a string length < 0)."
+                );
+            }
+            ind = strStartInd + strLen;
+            if (ind > encodedColLen) {
+                throw new IllegalArgumentException(
+                        "Invalid encoded collection of strings (a string exceeds encoded length)."
+                );
+            }
+            res.add(encodedCol.substring(strStartInd, ind));
+        }
     }
     
     public static class InvalidConfigException extends IllegalStateException {

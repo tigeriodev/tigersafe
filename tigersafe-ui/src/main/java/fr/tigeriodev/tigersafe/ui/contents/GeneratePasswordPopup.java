@@ -205,10 +205,11 @@ public class GeneratePasswordPopup implements Destroyable {
             String alphabet = alphabetSB.toString();
             log.debug(() -> "alphabet = " + alphabet);
             
-            if (!StringUtils.containsUniqueChars(alphabet)) {
+            Character duplicateChar = StringUtils.getDuplicateCharIn(alphabet);
+            if (duplicateChar != null) {
                 Alert errorPopup = new Alert(
                         AlertType.ERROR,
-                        Lang.get(POPUP_LANG_BASE + ".generate.error.duplicateChars"),
+                        Lang.get(POPUP_LANG_BASE + ".generate.error.duplicateChars", duplicateChar),
                         ButtonType.OK
                 );
                 UIUtils.showDialogAndWait(errorPopup);

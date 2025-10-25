@@ -83,16 +83,16 @@ public final class StringUtils {
         return src != null ? "char[" + src.length + "]" : "null";
     }
     
-    public static final boolean containsUniqueChars(String str) {
+    public static final Character getDuplicateCharIn(String str) {
         // nlog(n) time complexity, n extra memory
         char[] chars = str.toCharArray();
         Arrays.sort(chars);
         for (int i = 0; i < chars.length - 1; i++) {
             if (chars[i] == chars[i + 1]) {
-                return false;
+                return chars[i];
             }
         }
-        return true;
+        return null;
     }
     
     public static final String getSafeObjName(final Object obj) {

@@ -22,7 +22,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HexFormat;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -81,6 +84,62 @@ public final class StringUtils {
     
     public static final String charArrayToObfuscatedStr(char[] src) {
         return src != null ? "char[" + src.length + "]" : "null";
+    }
+    
+    /**
+     * Removes all characters from {@code str} listed in {@code separators} if they appear at least twice.
+     * @param str the string to process.
+     * @param separators the characters that will be removed if they appear at least twice in {@code str}.
+     * @return the string {@code str} without the characters in {@code separators} that are present at least twice.
+     */
+    public static final String removeSeparatorsIn(String str, Set<Character> separators) {
+        StringBuilder res = new StringBuilder();
+        Map<Character, Integer> separatorsFoundInd = new HashMap<>();
+        for (Character separator : separators) {
+            separatorsFoundInd.put(separator, 0);
+        }
+        
+        int curResInd = 0;
+        Integer curSepFoundInd;
+        for (Character c : str.toCharArray()) {
+            curSepFoundInd = separatorsFoundInd.get(c);
+            if (curSepFoundInd != null) {
+                if (curSepFoundInd == 0) {
+                    separatorsFoundInd.put(c, -(curResInd + 1));
+                } else if (curSepFoundInd < 0) {
+                    separatorsFoundInd.put(c, -curSepFoundInd);
+                    continue;
+                } else {
+                    continue;
+                }
+            }
+            res.append(c);
+            curResInd++;
+        }
+        
+        int toDelIndsLen = separatorsFoundInd.size();
+        int[] toDelInds = new int[toDelIndsLen];
+        int toDelIndsCurInd = 0;
+        int sepsFoundCurInd;
+        for (Integer sepFoundInd : separatorsFoundInd.values()) {
+            sepsFoundCurInd = sepFoundInd.intValue();
+            if (sepsFoundCurInd > 0) {
+                toDelInds[toDelIndsCurInd++] = sepsFoundCurInd - 1;
+            }
+        }
+        
+        if (toDelIndsCurInd != 0) {
+            if (toDelIndsCurInd != toDelIndsLen) {
+                toDelInds = Arrays.copyOf(toDelInds, toDelIndsCurInd);
+                toDelIndsLen = toDelIndsCurInd;
+            }
+            Arrays.sort(toDelInds);
+            for (int i = toDelIndsLen - 1; i >= 0; i--) {
+                res.deleteCharAt(toDelInds[i]);
+            }
+        }
+        
+        return res.toString();
     }
     
     public static final Character getDuplicateCharIn(String str) {

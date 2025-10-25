@@ -37,7 +37,7 @@ public final class TOTP implements Destroyable {
     private static final String URI_TYPE = "totp";
     
     public static final NumberRange ALGO_ORD_RANGE = new NumberRange(0, 2); // [0; 3]
-    public static final NumberRange DIGITS_NUM_RANGE = new NumberRange(1, 4); // [1; 16]
+    public static final NumberRange DIGITS_NUM_RANGE = new NumberRange(5, 2); // [5; 8]
     public static final NumberRange PERIOD_SECONDS_RANGE = new NumberRange(1, 8); // [1; 256]
     
     static {

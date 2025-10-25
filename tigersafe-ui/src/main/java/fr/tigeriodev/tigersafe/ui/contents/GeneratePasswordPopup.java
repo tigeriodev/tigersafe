@@ -64,6 +64,7 @@ public class GeneratePasswordPopup implements Destroyable {
     static final int[] LEN_BTNS_REL_ADD = new int[] {
             -10, -5, -1, 1, 5, 10
     };
+    static final Set<Character> CUSTOM_CHARS_SEPARATORS = Set.of(' ', ',', ';', '/');
     
     final Stage stage;
     final Scene scene;
@@ -170,6 +171,11 @@ public class GeneratePasswordPopup implements Destroyable {
         customComboBox.valueProperty().addListener((ov, oldCustomChars, newCustomChars) -> {
             if (CheckUtils.isNotEmpty(newCustomChars)) {
                 customCheckB.setSelected(true);
+                String newCustomCharsWithoutSeps =
+                        StringUtils.removeSeparatorsIn(newCustomChars, CUSTOM_CHARS_SEPARATORS);
+                if (!newCustomChars.equals(newCustomCharsWithoutSeps)) {
+                    customComboBox.setValue(newCustomCharsWithoutSeps);
+                }
             } // else keep checkbox as is, particularly useful in case the user wants to delete all saved customChars
         });
         

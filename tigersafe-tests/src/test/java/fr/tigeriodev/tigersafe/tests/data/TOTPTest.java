@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import fr.tigeriodev.tigersafe.data.TOTP;
 import fr.tigeriodev.tigersafe.tests.TestClass;
+import fr.tigeriodev.tigersafe.utils.StringUtils;
 
 public class TOTPTest extends TestClass {
     
@@ -51,6 +53,48 @@ public class TOTPTest extends TestClass {
         assertTrue(totp.updateCurTime(totp.getNextIntervalStartTime()));
         assertEquals("809365", totp.getCurCode());
         assertEquals("610045", totp.getNextCode());
+    }
+    
+    @Test
+    void testNewCode() {
+        byte[][] keys = new byte[][] {
+                StringUtils.hexStrToBytes(
+                        "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38 39 30"
+                ),
+                StringUtils.hexStrToBytes(
+                        "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38 39 30"
+                                + " 31 32 33 34 35 36 37 38 39 30 31 32"
+                ),
+                StringUtils.hexStrToBytes(
+                        "31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38 39 30"
+                                + " 31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38 39 30"
+                                + " 31 32 33 34 35 36 37 38 39 30 31 32 33 34 35 36 37 38 39 30"
+                                + " 31 32 33 34"
+                )
+        };
+        
+        for (byte[] key : keys) {
+            for (TOTP.Algorithm algo : TOTP.Algorithm.values()) {
+                for (
+                        int digitsNum = TOTP.DIGITS_NUM_RANGE.min;
+                        digitsNum <= TOTP.DIGITS_NUM_RANGE.getMax();
+                        digitsNum++
+                ) {
+                    TOTP totp = new TOTP(key, "", "", algo, digitsNum, 30);
+                    String newCode1 = totp.newCode(25L);
+                    assertNotEquals(
+                            newCode1,
+                            totp.newCode(26L),
+                            () -> "Same codes for " + new String(totp.getURI())
+                    );
+                    assertEquals(
+                            digitsNum,
+                            newCode1.length(),
+                            () -> "Invalid code length for " + new String(totp.getURI())
+                    );
+                }
+            }
+        }
     }
     
     @Nested
@@ -131,17 +175,53 @@ public class TOTPTest extends TestClass {
         @Test
         void testDigits() {
             char[] fullURI =
-                    "otpauth://totp/user@host.com?secret=ABCWZ3PPEHPK3VXL&algorithm=SHA1&digits=8&period=30"
+                    "otpauth://totp/user@host.com?secret=ABCWZ3PPEHPK3VXL&algorithm=SHA1&digits=7&period=30"
                             .toCharArray();
             TOTP totp = TOTP.fromURI(fullURI);
-            assertEquals(totp.digitsNum, 8);
+            assertEquals(totp.digitsNum, 7);
             assertArrayEquals(fullURI, totp.getURI());
             
             TOTP totp2 = TOTP.fromURI(
-                    "otpauth://totp/user@host.com?digits=8&secret=ABCWZ3PPEHPK3VXL".toCharArray()
+                    "otpauth://totp/user@host.com?digits=7&secret=ABCWZ3PPEHPK3VXL".toCharArray()
             );
             assertEquals(totp, totp2);
             assertArrayEquals(fullURI, totp2.getURI());
+        }
+        
+        @Test
+        void testMaxDigits() {
+            assertThrowsExactly(
+                    IllegalArgumentException.class,
+                    () -> TOTP.fromURI(
+                            "otpauth://totp/user@host.com?secret=ABCWZ3PPEHPK3VXL&algorithm=SHA1&digits=9&period=30"
+                                    .toCharArray()
+                    )
+            );
+            
+            char[] fullURI =
+                    "otpauth://totp/user@host.com?secret=ABCWZ3PPEHPK3VXL&algorithm=SHA1&digits=8&period=30"
+                            .toCharArray();
+            TOTP totp = TOTP.fromURI(fullURI);
+            assertEquals(totp.digitsNum, TOTP.DIGITS_NUM_RANGE.getMax());
+            assertArrayEquals(fullURI, totp.getURI());
+        }
+        
+        @Test
+        void testMinDigits() {
+            assertThrowsExactly(
+                    IllegalArgumentException.class,
+                    () -> TOTP.fromURI(
+                            "otpauth://totp/user@host.com?secret=ABCWZ3PPEHPK3VXL&algorithm=SHA1&digits=4&period=30"
+                                    .toCharArray()
+                    )
+            );
+            
+            char[] fullURI =
+                    "otpauth://totp/user@host.com?secret=ABCWZ3PPEHPK3VXL&algorithm=SHA1&digits=5&period=30"
+                            .toCharArray();
+            TOTP totp = TOTP.fromURI(fullURI);
+            assertEquals(totp.digitsNum, TOTP.DIGITS_NUM_RANGE.min);
+            assertArrayEquals(fullURI, totp.getURI());
         }
         
         @Test

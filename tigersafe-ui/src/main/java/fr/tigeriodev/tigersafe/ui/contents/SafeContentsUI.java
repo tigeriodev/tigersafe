@@ -119,7 +119,29 @@ public class SafeContentsUI implements UI {
         updateUnsavedFooterDisplay();
         
         closeSafeBtn.setOnAction((e) -> {
-            UIApp.getInstance().showSafeSelection();
+            if (!dm.hasChanges()) {
+                UIApp.getInstance().showSafeSelection();
+                return;
+            }
+            
+            ButtonType showChangesBtn =
+                    new ButtonType(Lang.get("SafeContentsUI.changes.show.button.text"));
+            ButtonType saveChangesBtn =
+                    new ButtonType(Lang.get("SafeContentsUI.changes.save.button.text"));
+            Alert warnPopup = new Alert(
+                    AlertType.WARNING,
+                    Lang.get("SafeContentsUI.closeSafe.unsavedChanges.popup"),
+                    showChangesBtn,
+                    saveChangesBtn,
+                    ButtonType.CANCEL
+            );
+            UIUtils.showDialogAndWait(warnPopup).ifPresent((clickedBtn) -> {
+                if (clickedBtn == showChangesBtn) {
+                    selectTab(changesTab);
+                } else if (clickedBtn == saveChangesBtn) {
+                    showSaveChangesConfirmPopup();
+                }
+            });
         });
         
         footerShowChangesBtn.setOnAction((e) -> {
@@ -209,26 +231,30 @@ public class SafeContentsUI implements UI {
     Button newSaveChangesBtn() {
         Button res = UIUtils.newBtn("SafeContentsUI.changes.save.button", "save", true, false);
         res.setOnAction((e) -> {
-            Alert confirmPopup = new Alert(
-                    AlertType.CONFIRMATION,
-                    Lang.get("SafeContentsUI.changes.save.confirm"),
-                    ButtonType.YES,
-                    ButtonType.CANCEL
-            );
-            UIUtils.showDialogAndWait(confirmPopup).ifPresent((clickedBtn) -> {
-                if (clickedBtn == ButtonType.YES) {
-                    try {
-                        dm.updateSafeFile();
-                        dm.loadSafeFile(); // Reset unsaved changes
-                        selectTab(curTab, true);
-                        updateUnsavedFooterDisplay();
-                    } catch (Exception ex) {
-                        UIApp.getInstance().showError(ex);
-                    }
-                }
-            });
+            showSaveChangesConfirmPopup();
         });
         return res;
+    }
+    
+    void showSaveChangesConfirmPopup() {
+        Alert confirmPopup = new Alert(
+                AlertType.CONFIRMATION,
+                Lang.get("SafeContentsUI.changes.save.confirm"),
+                ButtonType.YES,
+                ButtonType.CANCEL
+        );
+        UIUtils.showDialogAndWait(confirmPopup).ifPresent((clickedBtn) -> {
+            if (clickedBtn == ButtonType.YES) {
+                try {
+                    dm.updateSafeFile();
+                    dm.loadSafeFile(); // Reset unsaved changes
+                    selectTab(curTab, true);
+                    updateUnsavedFooterDisplay();
+                } catch (Exception ex) {
+                    UIApp.getInstance().showError(ex);
+                }
+            }
+        });
     }
     
     /**

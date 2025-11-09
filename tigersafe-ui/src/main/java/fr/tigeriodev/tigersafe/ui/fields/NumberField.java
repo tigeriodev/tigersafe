@@ -72,6 +72,7 @@ public class NumberField {
             }
         });
         
+        this.val = minVal - 1;
         setVal(minVal, false);
     }
     
@@ -79,41 +80,40 @@ public class NumberField {
         Button res = new Button((relativeAdd > 0 ? "+" : "") + relativeAdd);
         res.setOnAction((e) -> {
             int newVal = val + relativeAdd;
-            if (newVal < minVal) {
-                newVal = minVal;
-            } else if (newVal > maxVal) {
-                newVal = maxVal;
-            }
             setVal(newVal, false);
         });
         return res;
     }
     
-    public boolean isValidVal(int val) {
-        return val >= minVal && val <= maxVal;
+    public int getBoundedVal(int val) {
+        if (val <= minVal) {
+            return minVal;
+        } else if (val >= maxVal) {
+            return maxVal;
+        } else {
+            return val;
+        }
     }
     
-    public void setVal(int newVal, boolean isInputUpdated) {
-        if (newVal == val) {
-            return;
-        }
+    public void setVal(int unboundedNewVal, boolean isInputUpdated) {
+        int boundedNewVal = getBoundedVal(unboundedNewVal);
         
-        boolean isNewValValid = isValidVal(newVal);
-        if (isNewValValid) {
+        if (boundedNewVal != val) {
             boolean wasLimitVal = val == minVal || val == maxVal;
-            val = newVal;
-            if (wasLimitVal || newVal == minVal || newVal == maxVal) {
+            val = boundedNewVal;
+            if (wasLimitVal || boundedNewVal == minVal || boundedNewVal == maxVal) {
                 for (Button decrBtn : decrBtns) {
-                    decrBtn.setDisable(newVal == minVal);
+                    decrBtn.setDisable(boundedNewVal == minVal);
                 }
                 for (Button incrBtn : incrBtns) {
-                    incrBtn.setDisable(newVal == maxVal);
+                    incrBtn.setDisable(boundedNewVal == maxVal);
                 }
             }
             valChangeNotifier.notifyListeners();
         }
-        if (!isInputUpdated || !isNewValValid) {
-            inputField.setText(val + "");
+        
+        if (!isInputUpdated || boundedNewVal != unboundedNewVal) {
+            inputField.setText(boundedNewVal + "");
         }
     }
     

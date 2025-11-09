@@ -35,13 +35,17 @@ public final class Cipher implements CipherImpl {
     
     private static final Logger log = Logs.newLogger(Cipher.class);
     
-    public final String name;
+    private final String name;
     private final CipherImpl impl;
     private volatile WorkingStatus workingStatus = WorkingStatus.UNCHECKED;
     
     public Cipher(String name, CipherImpl impl) {
         this.name = name;
         this.impl = CheckUtils.notNull(impl);
+    }
+    
+    public String getName() {
+        return new String(name.toCharArray());
     }
     
     public static enum WorkingStatus {

@@ -18,6 +18,9 @@
 
 package fr.tigeriodev.tigersafe.ui.contents;
 
+import static fr.tigeriodev.tigersafe.GlobalConfig.PW_GENERATION_MAX_LEN;
+import static fr.tigeriodev.tigersafe.GlobalConfig.PW_GENERATION_MIN_LEN;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashSet;
@@ -59,8 +62,6 @@ public class GeneratePasswordPopup implements Destroyable {
     static final String POPUP_LANG_BASE = "SafeContentsUI.passwordEntry.password.generate.popup";
     static final String ALPHABET_LANG_BASE = POPUP_LANG_BASE + ".alphabet";
     static final String LENGTH_LANG_BASE = POPUP_LANG_BASE + ".length";
-    static final int MIN_LEN = 1;
-    static final int MAX_LEN = 10000;
     static final int[] LEN_BTNS_REL_ADD = new int[] {
             -10, -5, -1, 1, 5, 10
     };
@@ -109,7 +110,8 @@ public class GeneratePasswordPopup implements Destroyable {
         lengthGrid.getStyleClass().add("length-grid");
         
         // Max before min to be able to type max=40 then min=20, otherwise typing min=20 then max=40 would be processed as min=20 then max=4 which would trigger min=4
-        NumberField maxLenField = new NumberField(MIN_LEN, MAX_LEN, LEN_BTNS_REL_ADD);
+        NumberField maxLenField =
+                new NumberField(PW_GENERATION_MIN_LEN, PW_GENERATION_MAX_LEN, LEN_BTNS_REL_ADD);
         UIUtils.addNodeToGrid(
                 lengthGrid,
                 0,
@@ -118,7 +120,8 @@ public class GeneratePasswordPopup implements Destroyable {
                 false
         );
         
-        NumberField minLenField = new NumberField(MIN_LEN, MAX_LEN, LEN_BTNS_REL_ADD);
+        NumberField minLenField =
+                new NumberField(PW_GENERATION_MIN_LEN, PW_GENERATION_MAX_LEN, LEN_BTNS_REL_ADD);
         UIUtils.addNodeToGrid(
                 lengthGrid,
                 1,
@@ -173,7 +176,10 @@ public class GeneratePasswordPopup implements Destroyable {
                 customCheckB.setSelected(true);
                 String newCustomCharsWithoutSeps =
                         StringUtils.removeSeparatorsIn(newCustomChars, CUSTOM_CHARS_SEPARATORS);
-                if (!newCustomChars.equals(newCustomCharsWithoutSeps)) {
+                if (
+                    !newCustomCharsWithoutSeps.isEmpty()
+                            && !newCustomChars.equals(newCustomCharsWithoutSeps)
+                ) {
                     customComboBox.setValue(newCustomCharsWithoutSeps);
                 }
             } // else keep checkbox as is, particularly useful in case the user wants to delete all saved customChars

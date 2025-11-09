@@ -343,8 +343,9 @@ public final class SafeDataManager implements Destroyable {
     public void changeSafeCiphers(String newInternalDataCipherName, String newUserDataCipherName)
             throws Exception {
         checkNotDestroyed();
-        String initInternalCipherName = GlobalConfig.ConfigCipher.INTERNAL_DATA.getCipher().name;
-        String initUserCipherName = GlobalConfig.ConfigCipher.USER_DATA.getCipher().name;
+        String initInternalCipherName =
+                GlobalConfig.ConfigCipher.INTERNAL_DATA.getCipher().getName();
+        String initUserCipherName = GlobalConfig.ConfigCipher.USER_DATA.getCipher().getName();
         
         GlobalConfig conf = GlobalConfig.getInstance();
         try {

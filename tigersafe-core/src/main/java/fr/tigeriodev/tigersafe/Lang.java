@@ -24,33 +24,32 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public final class Lang {
     
-    public static final Locale[] AVAILABLE_LANGUAGES = new Locale[] {
-            Locale.ENGLISH, Locale.FRENCH
-    };
+    public static final Set<Locale> AVAILABLE_LANGUAGES = Set.of(Locale.ENGLISH, Locale.FRENCH);
     
-    private static ResourceBundle bundle;
-    private static Properties customLangProps;
+    private ResourceBundle bundle;
+    private Properties customLangProps;
     
-    private Lang() {}
+    Lang() {}
     
-    static void setLanguage(Locale locale) {
+    void setLanguage(Locale locale) {
         if (!isAvailable(locale)) {
             throw new IllegalArgumentException("Unavailable language: " + locale + ".");
         }
-        Lang.bundle = ResourceBundle.getBundle("languages.language", locale);
+        bundle = ResourceBundle.getBundle("languages.language", locale);
     }
     
-    static void setCustomLanguageFile(File langFile) {
+    void setCustomLanguageFile(File langFile) {
         if (langFile == null) {
             customLangProps = null;
             return;
         }
-        try {
+        try (FileInputStream fileIn = new FileInputStream(langFile)) {
             customLangProps = new Properties();
-            customLangProps.load(new FileInputStream(langFile));
+            customLangProps.load(fileIn);
         } catch (IOException ex) {
             customLangProps = null;
             throw new IllegalArgumentException(ex);
@@ -58,6 +57,14 @@ public final class Lang {
     }
     
     public static String getUnformatted(String key) {
+        return getInstance().getUnformattedVal(key);
+    }
+    
+    public static Lang getInstance() {
+        return GlobalConfig.getInstance().getLang();
+    }
+    
+    public String getUnformattedVal(String key) {
         String customLangVal = customLangProps != null ? customLangProps.getProperty(key) : null;
         if (customLangVal != null) {
             return customLangVal;
@@ -70,12 +77,7 @@ public final class Lang {
     }
     
     public static boolean isAvailable(Locale locale) {
-        for (Locale availLang : AVAILABLE_LANGUAGES) {
-            if (availLang.equals(locale)) {
-                return true;
-            }
-        }
-        return false;
+        return AVAILABLE_LANGUAGES.contains(locale);
     }
     
 }

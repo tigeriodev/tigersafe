@@ -21,7 +21,7 @@ package fr.tigeriodev.tigersafe.ciphers;
 public class NotWorkingCipherException extends RuntimeException {
     
     public NotWorkingCipherException(Cipher cipher) {
-        super(cipher.name + " cipher is not working.");
+        super(cipher.getName() + " cipher is not working.");
     }
     
 }

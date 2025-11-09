@@ -51,7 +51,7 @@ public class CiphersManagerTest extends TestClass {
         assertEquals(4, ciphers.size());
         
         for (Cipher cipher : ciphers) {
-            assertTrue(cipher == CiphersManager.getCipherByName(cipher.name));
+            assertTrue(cipher == CiphersManager.getCipherByName(cipher.getName()));
             cipher.checkWorkingAsync();
         }
         

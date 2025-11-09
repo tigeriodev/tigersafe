@@ -190,6 +190,10 @@ public class SafeSelectionUI implements UI {
         UIUtils.onNextChange(topHBox.widthProperty(), (newVal) -> {
             topHBox.setBackground(Background.fill(Paint.valueOf("#f4f4f4")));
         });
+        
+        if (lastSafeFile != null) {
+            pwField.requestFocus();
+        }
     }
     
     @Override

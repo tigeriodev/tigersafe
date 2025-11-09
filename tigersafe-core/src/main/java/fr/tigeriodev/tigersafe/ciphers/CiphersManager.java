@@ -49,7 +49,7 @@ public final class CiphersManager {
     private CiphersManager() {}
     
     private static void addCipher(Cipher cipher) {
-        if (CIPHERS_BY_NAME.put(cipher.name, cipher) != null) {
+        if (CIPHERS_BY_NAME.put(cipher.getName(), cipher) != null) {
             throw new IllegalStateException("Cipher already added: " + cipher + ".");
         }
     }

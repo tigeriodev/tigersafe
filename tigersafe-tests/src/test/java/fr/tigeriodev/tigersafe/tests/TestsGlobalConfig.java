@@ -32,7 +32,8 @@ public final class TestsGlobalConfig {
     }
     
     public static void initForTest(File userGlobalConfigFile) throws IOException {
-        GlobalConfig.initForTest(userGlobalConfigFile);
+        GlobalConfig.initFile(userGlobalConfigFile);
+        GlobalConfig.setInstance(new GlobalConfig(userGlobalConfigFile), false, false);
     }
     
 }

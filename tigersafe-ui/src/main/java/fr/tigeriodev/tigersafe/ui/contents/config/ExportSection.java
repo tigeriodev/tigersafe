@@ -177,7 +177,7 @@ class ExportSection extends Section implements Destroyable {
         serialDirField.setVal(safeFile.getParentFile());
         serialFileNameField.setText("serialized-" + safeFile.getName());
         
-        serialCipherBox.setValue(GlobalConfig.ConfigCipher.USER_DATA.getCipher().name);
+        serialCipherBox.setValue(GlobalConfig.ConfigCipher.USER_DATA.getCipher().getName());
         serialVerField.setVal(SafeSerializationManager.MAX_SERIAL_VER, false);
         
         exportBtn.setOnAction((e) -> {

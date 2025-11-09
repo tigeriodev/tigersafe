@@ -71,9 +71,9 @@ public class LangTest extends TestClass {
         void testSameKeysAndAvailable() throws IOException, URISyntaxException {
             getResourceDirFiles("languages", (defFilesPath) -> {
                 assertEquals(
-                        Lang.AVAILABLE_LANGUAGES.length,
+                        Lang.AVAILABLE_LANGUAGES.size(),
                         defFilesPath.size(),
-                        () -> "Lang.AVAILABLE_LANGUAGES len " + Lang.AVAILABLE_LANGUAGES.length
+                        () -> "Lang.AVAILABLE_LANGUAGES size " + Lang.AVAILABLE_LANGUAGES.size()
                                 + " != default language files number " + defFilesPath.size() + "."
                 );
                 Path refFilePath = defFilesPath.get(0);

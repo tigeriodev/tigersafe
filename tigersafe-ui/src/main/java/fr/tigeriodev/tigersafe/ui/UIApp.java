@@ -19,14 +19,21 @@
 package fr.tigeriodev.tigersafe.ui;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.GeneralSecurityException;
+import java.util.Properties;
+import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import fr.tigeriodev.tigersafe.GlobalConfig;
+import fr.tigeriodev.tigersafe.GlobalConfig.InvalidConfigPropertyValueException;
 import fr.tigeriodev.tigersafe.Lang;
 import fr.tigeriodev.tigersafe.MonitoringManager;
 import fr.tigeriodev.tigersafe.data.SafeDataManager;
@@ -83,11 +90,35 @@ public final class UIApp extends Application {
                     "A (possibly non-existent/empty) configuration file path must be defined with: -config <path>."
             );
         }
+        File userGlobalConfigFile = new File(globalConfigPath);
         
-        try {
-            GlobalConfig.init(new File(globalConfigPath));
-        } catch (IOException | GeneralSecurityException ex) {
-            throw new IllegalStateException("Failed to initialize global config.", ex);
+        try (Scanner scanner = new Scanner(new FilterInputStream(System.in) {
+            
+            @Override
+            public void close() throws IOException {
+                // do not close System.in
+            }
+            
+        })) {
+            boolean isGlobalConfigInitialized = false;
+            while (!isGlobalConfigInitialized) {
+                try {
+                    GlobalConfig.initFile(userGlobalConfigFile);
+                    GlobalConfig globalConfig = new GlobalConfig(userGlobalConfigFile);
+                    UIConfig uiConfig = new UIConfig(globalConfig);
+                    GlobalConfig.setInstance(globalConfig, true, true);
+                    UIConfig.setInstance(uiConfig, true, true);
+                    isGlobalConfigInitialized = true;
+                } catch (InvalidConfigPropertyValueException ex) {
+                    log.error(
+                            () -> "Invalid global config value for \"" + ex.getPropKey() + "\": ",
+                            ex
+                    );
+                    askInvalidConfigPropOption(ex.getPropKey(), userGlobalConfigFile, scanner);
+                } catch (IOException ex) {
+                    throw new IllegalStateException("Failed to initialize global config.", ex);
+                }
+            }
         }
         
         System.setProperty("prism.cacheLayoutSize", "0"); // Avoid caching of strings typed in TextFields
@@ -98,6 +129,99 @@ public final class UIApp extends Application {
         } finally {
             log.debug(() -> "UI app launch end");
             getInstance().onShutdown();
+        }
+    }
+    
+    private static void askInvalidConfigPropOption(String propKey, File userGlobalConfigFile,
+            Scanner scanner) {
+        String propDefVal;
+        try {
+            propDefVal = GlobalConfig.getDefaultProperties().getProperty(propKey);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Failed to get global config default properties.", ex);
+        }
+        String notice = """
+        ====================================================================================
+        Your configuration file contains an invalid value for "%1$s" property.
+        This value must be changed in order to launch TigerSafe.
+
+        You can easily fix your configuration file with one of these options:
+         - Type "r" to reset the "%1$s" property to its default value ("%2$s").
+         - Type "s", then space, then the new value to set for "%1$s" property.
+           For example: "s 50" to set the new value of the property to "50".
+         - Type "f" to reset your whole configuration file to the default
+           configuration file (your configuration file will be deleted).
+        (after typing your option, you need to press Enter to validate it)
+
+        As a reminder, your configuration file is located at:
+        %3$s
+        ====================================================================================
+        """.formatted(propKey, propDefVal, userGlobalConfigFile.getAbsolutePath());
+        System.out.println(notice);
+        
+        switch (scanner.next()) {
+            case "r" -> {
+                try {
+                    changeConfigProp(userGlobalConfigFile, propKey, propDefVal);
+                    System.out.println(
+                            "The \"%s\" property has been successfully reset to its default value \"%s\"."
+                                    .formatted(propKey, propDefVal)
+                    );
+                } catch (IOException ex) {
+                    System.out.println(
+                            "Failed to reset \"%s\" property to its default value \"%s\"."
+                                    .formatted(propKey, propDefVal)
+                    );
+                    throw new RuntimeException(ex);
+                }
+            }
+            case "s" -> {
+                String propNewVal = scanner.nextLine();
+                if (!propNewVal.isEmpty()) {
+                    propNewVal = propNewVal.substring(1); // rm first space
+                }
+                try {
+                    changeConfigProp(userGlobalConfigFile, propKey, propNewVal);
+                    System.out.println(
+                            "The \"%s\" property has been successfully set to \"%s\"."
+                                    .formatted(propKey, propNewVal)
+                    );
+                } catch (IOException ex) {
+                    System.out.println(
+                            "Failed to set \"%s\" property to \"%s\"."
+                                    .formatted(propKey, propNewVal)
+                    );
+                    throw new RuntimeException(ex);
+                }
+            }
+            case "f" -> {
+                try {
+                    Files.delete(userGlobalConfigFile.toPath());
+                    System.out.println(
+                            "Your configuration file has been successfully deleted in order to recreate it later by copying the default configuration file."
+                    );
+                } catch (IOException ex) {
+                    System.out.println(
+                            "Failed to delete your configuration file in order to recreate it later by copying the default configuration file."
+                    );
+                    throw new RuntimeException(ex);
+                }
+            }
+            default -> {
+                System.out.println("You typed an invalid option.");
+            }
+        }
+    }
+    
+    private static void changeConfigProp(File configFile, String propKey, String propNewVal)
+            throws IOException {
+        Properties props = new Properties();
+        try (FileInputStream configFileIn = new FileInputStream(configFile)) {
+            props.load(configFileIn);
+        }
+        props.setProperty(propKey, propNewVal);
+        try (FileWriter writer = new FileWriter(configFile)) {
+            props.store(writer, null);
         }
     }
     

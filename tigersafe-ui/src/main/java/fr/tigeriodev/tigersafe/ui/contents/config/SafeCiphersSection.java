@@ -91,8 +91,8 @@ class SafeCiphersSection extends Section implements Destroyable {
             updateSaveBtnAvailability();
         });
         
-        internalDataBox.setValue(GlobalConfig.ConfigCipher.INTERNAL_DATA.getCipher().name);
-        userDataBox.setValue(GlobalConfig.ConfigCipher.USER_DATA.getCipher().name);
+        internalDataBox.setValue(GlobalConfig.ConfigCipher.INTERNAL_DATA.getCipher().getName());
+        userDataBox.setValue(GlobalConfig.ConfigCipher.USER_DATA.getCipher().getName());
         
         internalDataBox.valueProperty().addListener((ov, oldVal, newVal) -> {
             updateSaveBtnAvailability();
@@ -142,9 +142,12 @@ class SafeCiphersSection extends Section implements Destroyable {
     }
     
     private static boolean areCurCiphers(String newInternalCipherName, String newUserCipherName) {
-        return GlobalConfig.ConfigCipher.INTERNAL_DATA.getCipher().name
+        return GlobalConfig.ConfigCipher.INTERNAL_DATA.getCipher()
+                .getName()
                 .equals(newInternalCipherName)
-                && GlobalConfig.ConfigCipher.USER_DATA.getCipher().name.equals(newUserCipherName);
+                && GlobalConfig.ConfigCipher.USER_DATA.getCipher()
+                        .getName()
+                        .equals(newUserCipherName);
     }
     
     private void updateSaveBtnAvailability() {

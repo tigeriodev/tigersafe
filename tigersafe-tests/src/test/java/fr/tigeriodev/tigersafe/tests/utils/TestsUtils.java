@@ -21,6 +21,8 @@ package fr.tigeriodev.tigersafe.tests.utils;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class TestsUtils {
     
@@ -57,9 +59,9 @@ public class TestsUtils {
         }
     }
     
-    public static File newTestFile(String fileName) {
+    public static File newTestFile(String fileName) throws IOException {
         File res = new File("../tests/temp/junit", fileName);
-        res.delete();
+        Files.deleteIfExists(res.toPath());
         return res;
     }
     

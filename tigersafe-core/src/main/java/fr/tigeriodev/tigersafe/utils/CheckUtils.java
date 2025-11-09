@@ -86,6 +86,18 @@ public final class CheckUtils {
         return num;
     }
     
+    public static final int inRange(final int num, final int min, final int max) {
+        if (min > max) {
+            throw new IllegalArgumentException("min > max");
+        }
+        if (num < min || num > max) {
+            throw new IllegalArgumentException(
+                    "Int " + num + " is not in range: [" + min + "; " + max + "]."
+            );
+        }
+        return num;
+    }
+    
     public static final boolean isNotIllegal(final Runnable check) {
         try {
             check.run();

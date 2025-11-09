@@ -20,37 +20,47 @@ package fr.tigeriodev.tigersafe.ui;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 
 import fr.tigeriodev.tigersafe.GlobalConfig;
-import fr.tigeriodev.tigersafe.GlobalConfig.InvalidConfigException;
-import fr.tigeriodev.tigersafe.utils.CheckUtils;
+import fr.tigeriodev.tigersafe.GlobalConfig.InvalidConfigPropertyValueException;
 import javafx.scene.input.KeyCombination;
 
 public final class UIConfig {
     
     private static UIConfig instance;
+    private static boolean isLocked = false;
+    
+    public synchronized static void setInstance(UIConfig newInstance, boolean checkUnique,
+            boolean lock) {
+        if (isLocked) {
+            throw new IllegalStateException("The UI config instance is locked.");
+        }
+        
+        if (checkUnique && instance != null) {
+            throw new IllegalStateException("The UI config has already been initialized.");
+        }
+        
+        instance = Objects.requireNonNull(newInstance);
+        isLocked = lock;
+    }
     
     public static UIConfig getInstance() {
-        if (instance == null) {
-            instance = new UIConfig();
-        }
         return instance;
     }
     
     private final Map<KeyboardShortcut, KeyCombination> keyboardShortcuts;
     
-    private UIConfig() {
+    public UIConfig(GlobalConfig globalConfig) throws InvalidConfigPropertyValueException {
         keyboardShortcuts = new EnumMap<>(KeyboardShortcut.class);
-        GlobalConfig config = GlobalConfig.getInstance();
         for (KeyboardShortcut shortcut : KeyboardShortcut.values()) {
-            try {
-                keyboardShortcuts.put(
-                        shortcut,
-                        KeyCombination.valueOf(config.getProp(shortcut.getConfigKey()))
-                );
-            } catch (IllegalArgumentException | NullPointerException ex) {
-                throw InvalidConfigException.invalidVal(shortcut.getConfigKey(), ex);
-            }
+            keyboardShortcuts.put(
+                    shortcut,
+                    globalConfig.deserializeProp(
+                            shortcut.getConfigKey(),
+                            this::deserializeKeyboardShortcut
+                    )
+            );
         }
     }
     
@@ -87,13 +97,28 @@ public final class UIConfig {
         
     }
     
+    private String serializeKeyboardShortcut(KeyCombination keyComb) {
+        return keyComb.getName();
+    }
+    
+    private KeyCombination deserializeKeyboardShortcut(String serialized) {
+        return KeyCombination.valueOf(serialized);
+    }
+    
     public KeyCombination getKeyboardShortcut(KeyboardShortcut shortcut) {
         return keyboardShortcuts.get(shortcut);
     }
     
     public void setKeyboardShortcut(KeyboardShortcut shortcut, KeyCombination keyComb) {
-        keyboardShortcuts.put(shortcut, CheckUtils.notNull(keyComb));
-        GlobalConfig.getInstance().setProp(shortcut.getConfigKey(), keyComb.getName());
+        String serializedNewVal = serializeKeyboardShortcut(keyComb);
+        KeyCombination deserializedNewVal = deserializeKeyboardShortcut(serializedNewVal);
+        if (!Objects.equals(deserializedNewVal, keyComb)) {
+            throw new IllegalArgumentException(
+                    "Failed to serialize the provided keyboard shortcut."
+            );
+        }
+        keyboardShortcuts.put(shortcut, deserializedNewVal);
+        GlobalConfig.getInstance().setProp(shortcut.getConfigKey(), serializedNewVal);
     }
     
 }

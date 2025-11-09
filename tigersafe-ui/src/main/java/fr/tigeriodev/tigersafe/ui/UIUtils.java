@@ -18,6 +18,8 @@
 
 package fr.tigeriodev.tigersafe.ui;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -32,6 +34,8 @@ import com.sun.javafx.scene.text.TextLayout;
 import fr.tigeriodev.tigersafe.GlobalConfig;
 import fr.tigeriodev.tigersafe.Lang;
 import fr.tigeriodev.tigersafe.data.TOTP;
+import fr.tigeriodev.tigersafe.logs.Logger;
+import fr.tigeriodev.tigersafe.logs.Logs;
 import fr.tigeriodev.tigersafe.ui.fields.DestroyableTextArea;
 import fr.tigeriodev.tigersafe.ui.fields.DestroyableTextField;
 import fr.tigeriodev.tigersafe.ui.fields.FieldValidityIndication;
@@ -67,6 +71,7 @@ import javafx.stage.Window;
 
 public class UIUtils {
     
+    private static final Logger log = Logs.newLogger(UIUtils.class);
     private static final String DEF_STYLESHEET_URL =
             UIUtils.class.getResource("/default-style.css").toExternalForm();
     
@@ -221,14 +226,14 @@ public class UIUtils {
         for (int size : new int[] {
                 16, 24, 32, 48, 256
         }) {
-            stage.getIcons()
-                    .add(
-                            new Image(
-                                    UIUtils.class.getResourceAsStream(
-                                            "/icons/app/app-" + size + "x" + size + ".png"
-                                    )
-                            )
-                    );
+            try (
+                    InputStream iconFileIn = UIUtils.class
+                            .getResourceAsStream("/icons/app/app-" + size + "x" + size + ".png")
+            ) {
+                stage.getIcons().add(new Image(iconFileIn));
+            } catch (IOException ex) {
+                log.error(() -> "Failed to close app icon stream", ex);
+            }
         }
     }
     

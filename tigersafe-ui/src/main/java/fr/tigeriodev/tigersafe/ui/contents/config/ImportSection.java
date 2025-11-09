@@ -149,7 +149,7 @@ class ImportSection extends Section implements Destroyable {
             updateImportBtnAvailability();
         });
         
-        serialCipherBox.setValue(GlobalConfig.ConfigCipher.USER_DATA.getCipher().name);
+        serialCipherBox.setValue(GlobalConfig.ConfigCipher.USER_DATA.getCipher().getName());
         
         importBtn.setOnAction((e) -> {
             if (dm.hasChanges()) {

@@ -167,7 +167,7 @@ public class GlobalConfigUI implements UI {
                     true
             );
             ciphersBoxByConfig.put(confCipher, cipherBox);
-            cipherBox.setValue(confCipher.getCipher().name);
+            cipherBox.setValue(confCipher.getCipher().getName());
             cipherBox.valueProperty().addListener((ov, oldVal, newVal) -> {
                 updateSaveBtnAvailability();
             });
@@ -344,7 +344,7 @@ public class GlobalConfigUI implements UI {
         }
         
         for (Map.Entry<ConfigCipher, ComboBox<String>> ent : ciphersBoxByConfig.entrySet()) {
-            if (!Objects.equals(ent.getKey().getCipher().name, ent.getValue().getValue())) {
+            if (!Objects.equals(ent.getKey().getCipher().getName(), ent.getValue().getValue())) {
                 return true;
             }
         }
@@ -404,7 +404,7 @@ public class GlobalConfigUI implements UI {
             ConfigCipher confCipher = ent.getKey();
             Cipher newCipher = CiphersManager.getCipherByName(ent.getValue().getValue());
             if (!Objects.equals(confCipher.getCipher(), newCipher)) {
-                conf.setCipher(confCipher, newCipher.name);
+                conf.setCipher(confCipher, newCipher.getName());
                 hasChanged = true;
             }
         }

@@ -158,4 +158,23 @@ public final class StringUtils {
         return obj.getClass().getCanonicalName() + "@" + (obj.hashCode() & 0xfff);
     }
     
+    public static String stripZerosAfterSep(String numStr, char sep) {
+        numStr = numStr.trim();
+        int sepInd = numStr.indexOf(sep);
+        if (sepInd == -1) {
+            return numStr;
+        }
+        String befSep = numStr.substring(0, sepInd);
+        if (numStr.length() == sepInd + 1) {
+            return befSep;
+        }
+        String afterSep = numStr.substring(sepInd + 1);
+        String afterSepStripped = afterSep.replaceAll("0*$", "");
+        if (afterSepStripped.isEmpty()) {
+            return befSep;
+        } else {
+            return befSep + sep + afterSepStripped;
+        }
+    }
+    
 }

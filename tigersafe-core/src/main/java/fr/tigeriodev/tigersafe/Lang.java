@@ -21,6 +21,7 @@ package fr.tigeriodev.tigersafe;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -74,6 +75,14 @@ public final class Lang {
     
     public static String get(String key, Object... args) {
         return String.format(getUnformatted(key), args);
+    }
+    
+    public static char getDecimalSep() {
+        return DecimalFormatSymbols.getInstance(getLocale()).getDecimalSeparator();
+    }
+    
+    public static Locale getLocale() {
+        return Locale.getDefault(); // preferred to bundle.getLocale(), allowing custom locale
     }
     
     public static boolean isAvailable(Locale locale) {

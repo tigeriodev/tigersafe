@@ -318,6 +318,12 @@ public class UIUtils {
         return res;
     }
     
+    public static Label newFullLabel(String text) {
+        Label res = new Label(text);
+        UIUtils.forcePrefWidth(res);
+        return res;
+    }
+    
     public static void addViewableUnclearFieldToGrid(GridPane grid, int rowInd, String langKeyBase,
             ViewableUnclearField field, boolean withTooltip, boolean withValidIndic) {
         Label label = newLabel(langKeyBase, withTooltip);

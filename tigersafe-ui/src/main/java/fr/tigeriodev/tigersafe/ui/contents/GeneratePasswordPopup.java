@@ -35,20 +35,25 @@ import fr.tigeriodev.tigersafe.logs.Logger;
 import fr.tigeriodev.tigersafe.logs.Logs;
 import fr.tigeriodev.tigersafe.ui.UIApp;
 import fr.tigeriodev.tigersafe.ui.UIUtils;
+import fr.tigeriodev.tigersafe.ui.fields.DoubleDisplay;
+import fr.tigeriodev.tigersafe.ui.fields.DoubleField;
 import fr.tigeriodev.tigersafe.ui.fields.EditableComboBox;
-import fr.tigeriodev.tigersafe.ui.fields.NumberField;
+import fr.tigeriodev.tigersafe.ui.fields.IntegerField;
 import fr.tigeriodev.tigersafe.ui.fields.ViewableUnclearField;
 import fr.tigeriodev.tigersafe.utils.CheckUtils;
 import fr.tigeriodev.tigersafe.utils.MemUtils;
 import fr.tigeriodev.tigersafe.utils.MutableString;
 import fr.tigeriodev.tigersafe.utils.RandomUtils;
 import fr.tigeriodev.tigersafe.utils.StringUtils;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -62,11 +67,21 @@ public class GeneratePasswordPopup implements Destroyable {
     static final String POPUP_LANG_BASE = "SafeContentsUI.passwordEntry.password.generate.popup";
     static final String ALPHABET_LANG_BASE = POPUP_LANG_BASE + ".alphabet";
     static final String LENGTH_LANG_BASE = POPUP_LANG_BASE + ".length";
+    static final String STATS_LANG_BASE = POPUP_LANG_BASE + ".statistics";
     static final int[] LEN_BTNS_REL_ADD = new int[] {
             -10, -5, -1, 1, 5, 10
     };
     static final Set<Character> CUSTOM_CHARS_SEPARATORS = Set.of(' ', ',', ';', '/');
     
+    private final CheckBox lowerLettersCheckB;
+    private final CheckBox upperLettersCheckB;
+    private final CheckBox digitsCheckB;
+    private final CheckBox customCheckB;
+    private final EditableComboBox customComboBox;
+    private final IntegerField maxLenField;
+    private final IntegerField minLenField;
+    private final PossibilitiesHBox possibilitiesHBox;
+    private final CrackTimeHBox crackTimeHBox;
     final Stage stage;
     final Scene scene;
     private final ViewableUnclearField resultField;
@@ -83,17 +98,15 @@ public class GeneratePasswordPopup implements Destroyable {
         VBox alphabetVBox = new VBox();
         alphabetVBox.getStyleClass().add("alphabet-vbox");
         
-        CheckBox lowerLettersCheckB =
-                new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".lowercaseLetters"));
-        CheckBox upperLettersCheckB =
-                new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".uppercaseLetters"));
-        CheckBox digitsCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".digits"));
+        lowerLettersCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".lowercaseLetters"));
+        upperLettersCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".uppercaseLetters"));
+        digitsCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".digits"));
         
         HBox customHBox = new HBox();
         customHBox.getStyleClass().add("custom-chars-hbox");
         
-        CheckBox customCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".customChars"));
-        EditableComboBox customComboBox = new EditableComboBox();
+        customCheckB = new CheckBox(Lang.get(ALPHABET_LANG_BASE + ".customChars"));
+        customComboBox = new EditableComboBox();
         
         customHBox.getChildren().addAll(customCheckB, customComboBox);
         
@@ -110,8 +123,8 @@ public class GeneratePasswordPopup implements Destroyable {
         lengthGrid.getStyleClass().add("length-grid");
         
         // Max before min to be able to type max=40 then min=20, otherwise typing min=20 then max=40 would be processed as min=20 then max=4 which would trigger min=4
-        NumberField maxLenField =
-                new NumberField(PW_GENERATION_MIN_LEN, PW_GENERATION_MAX_LEN, LEN_BTNS_REL_ADD);
+        maxLenField =
+                new IntegerField(PW_GENERATION_MIN_LEN, PW_GENERATION_MAX_LEN, LEN_BTNS_REL_ADD);
         UIUtils.addNodeToGrid(
                 lengthGrid,
                 0,
@@ -120,8 +133,8 @@ public class GeneratePasswordPopup implements Destroyable {
                 false
         );
         
-        NumberField minLenField =
-                new NumberField(PW_GENERATION_MIN_LEN, PW_GENERATION_MAX_LEN, LEN_BTNS_REL_ADD);
+        minLenField =
+                new IntegerField(PW_GENERATION_MIN_LEN, PW_GENERATION_MAX_LEN, LEN_BTNS_REL_ADD);
         UIUtils.addNodeToGrid(
                 lengthGrid,
                 1,
@@ -131,6 +144,20 @@ public class GeneratePasswordPopup implements Destroyable {
         );
         
         lengthTitledP.setContent(lengthGrid);
+        
+        TitledPane statsTitledP = new TitledPane();
+        statsTitledP.setText(Lang.get(STATS_LANG_BASE + ".title"));
+        statsTitledP.setCollapsible(true);
+        
+        VBox statsVBox = new VBox();
+        statsVBox.getStyleClass().add("stats-vbox");
+        
+        possibilitiesHBox = new PossibilitiesHBox();
+        crackTimeHBox = new CrackTimeHBox();
+        
+        statsVBox.getChildren().addAll(possibilitiesHBox, crackTimeHBox);
+        
+        statsTitledP.setContent(statsVBox);
         
         Button generateBtn = UIUtils
                 .newBtn(POPUP_LANG_BASE + ".generate.button", "generate-password", true, false);
@@ -156,7 +183,14 @@ public class GeneratePasswordPopup implements Destroyable {
                 UIUtils.newBtn(POPUP_LANG_BASE + ".cancel.button", "cancel", true, false);
         
         rootVBox.getChildren()
-                .addAll(alphabetTitledP, lengthTitledP, generateBtn, resultTitledP, cancelBtn);
+                .addAll(
+                        alphabetTitledP,
+                        lengthTitledP,
+                        statsTitledP,
+                        generateBtn,
+                        resultTitledP,
+                        cancelBtn
+                );
         
         scene = new Scene(rootVBox);
         
@@ -171,6 +205,16 @@ public class GeneratePasswordPopup implements Destroyable {
         upperLettersCheckB.setSelected(true);
         digitsCheckB.setSelected(true);
         
+        ChangeListener<? super Boolean> checkboxListener = (ov, oldSelected, newSelected) -> {
+            if (oldSelected != newSelected) {
+                updateStats();
+            }
+        };
+        lowerLettersCheckB.selectedProperty().addListener(checkboxListener);
+        upperLettersCheckB.selectedProperty().addListener(checkboxListener);
+        digitsCheckB.selectedProperty().addListener(checkboxListener);
+        customCheckB.selectedProperty().addListener(checkboxListener);
+        
         customComboBox.valueProperty().addListener((ov, oldCustomChars, newCustomChars) -> {
             if (CheckUtils.isNotEmpty(newCustomChars)) {
                 customCheckB.setSelected(true);
@@ -183,38 +227,24 @@ public class GeneratePasswordPopup implements Destroyable {
                     customComboBox.setValue(newCustomCharsWithoutSeps);
                 }
             } // else keep checkbox as is, particularly useful in case the user wants to delete all saved customChars
+            updateStats();
         });
         
         minLenField.valChangeNotifier.addListener(() -> {
             if (maxLenField.getVal() < minLenField.getVal()) {
                 maxLenField.setVal(minLenField.getVal(), false);
             }
+            updateStats();
         });
         maxLenField.valChangeNotifier.addListener(() -> {
             if (minLenField.getVal() > maxLenField.getVal()) {
                 minLenField.setVal(maxLenField.getVal(), false);
             }
+            updateStats();
         });
         
         generateBtn.setOnAction((e) -> {
-            StringBuilder alphabetSB = new StringBuilder();
-            if (lowerLettersCheckB.isSelected()) {
-                alphabetSB.append("abcdefghijklmnopqrstuvwxyz");
-            }
-            if (upperLettersCheckB.isSelected()) {
-                alphabetSB.append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-            }
-            if (digitsCheckB.isSelected()) {
-                alphabetSB.append("0123456789");
-            }
-            if (customCheckB.isSelected()) {
-                String customChars = customComboBox.getValue();
-                if (customChars != null) {
-                    alphabetSB.append(customChars);
-                }
-            }
-            
-            String alphabet = alphabetSB.toString();
+            String alphabet = getAlphabet();
             log.debug(() -> "alphabet = " + alphabet);
             
             Character duplicateChar = StringUtils.getDuplicateCharIn(alphabet);
@@ -268,6 +298,157 @@ public class GeneratePasswordPopup implements Destroyable {
         maxLenField.setVal(conf.getPwGenerationMaxLen(), false);
         customComboBox.getItems().setAll(conf.getPwGenerationCustomChars());
         customComboBox.setValToFirstItem();
+        updateStats();
+    }
+    
+    private void updateStats() {
+        possibilitiesHBox
+                .update(minLenField.getVal(), maxLenField.getVal(), getAlphabet().length());
+        crackTimeHBox.update(possibilitiesHBox.pwsNumDisplay.getVal());
+    }
+    
+    private String getAlphabet() {
+        StringBuilder alphabetSB = new StringBuilder();
+        if (lowerLettersCheckB.isSelected()) {
+            alphabetSB.append("abcdefghijklmnopqrstuvwxyz");
+        }
+        if (upperLettersCheckB.isSelected()) {
+            alphabetSB.append("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        }
+        if (digitsCheckB.isSelected()) {
+            alphabetSB.append("0123456789");
+        }
+        if (customCheckB.isSelected()) {
+            String customChars = customComboBox.getValue();
+            if (customChars != null) {
+                alphabetSB.append(customChars);
+            }
+        }
+        
+        return alphabetSB.toString();
+    }
+    
+    private static class LabelsHolder {
+        
+        private final Label[] labels;
+        
+        LabelsHolder(int size) {
+            labels = new Label[size];
+            for (int i = 0; i < size; i++) {
+                labels[i] = UIUtils.newFullLabel("");
+            }
+        }
+        
+        void setText(String[] labelsText) {
+            for (int i = 0; i < labelsText.length && i < labels.length; i++) {
+                labels[i].setText(labelsText[i]);
+            }
+        }
+        
+        Label getLabel(int ind) {
+            return labels[ind];
+        }
+        
+    }
+    
+    private class PossibilitiesHBox extends HBox {
+        
+        final LabelsHolder labelsH;
+        final DoubleDisplay pwsNumDisplay;
+        
+        PossibilitiesHBox() {
+            super();
+            getStyleClass().add("possibilities-hbox");
+            
+            labelsH = new LabelsHolder(2);
+            pwsNumDisplay = new DoubleDisplay();
+            
+            getChildren().addAll(labelsH.getLabel(0), pwsNumDisplay, labelsH.getLabel(1));
+        }
+        
+        void update(int minLen, int maxLen, int alphabetLen) {
+            String possibilitiesStr = Lang.get(
+                    POPUP_LANG_BASE + ".statistics.possibilities",
+                    minLen,
+                    maxLen,
+                    alphabetLen
+            );
+            String[] possibilitiesParts = possibilitiesStr.split("%passwordsNum%", -1);
+            
+            labelsH.setText(possibilitiesParts);
+            
+            double pwsNum = 0d;
+            if (minLen == maxLen) {
+                pwsNum = Math.pow(alphabetLen, minLen);
+            } else {
+                for (int pwLen = minLen; pwLen <= maxLen; pwLen++) {
+                    pwsNum += Math.pow(alphabetLen, pwLen);
+                }
+            }
+            
+            pwsNumDisplay.setVal(pwsNum);
+        }
+        
+    }
+    
+    private class CrackTimeHBox extends HBox {
+        
+        static final String CRACK_LANG_BASE = POPUP_LANG_BASE + ".statistics.crackingTime";
+        static final String CRACK_YEARS_PH = "%crackYears%";
+        static final String ATTEMPTS_PER_SEC_PH = "%attemptsPerSec%";
+        
+        final LabelsHolder labelsH;
+        final DoubleDisplay crackYearsNumDisplay;
+        final DoubleField attemptsPerSecF;
+        
+        CrackTimeHBox() {
+            super();
+            getStyleClass().add("cracking-time-hbox");
+            
+            labelsH = new LabelsHolder(3);
+            crackYearsNumDisplay = new DoubleDisplay();
+            attemptsPerSecF = new DoubleField(
+                    Lang.get(CRACK_LANG_BASE + ".attemptsPerSec.invalid"),
+                    (d) -> d > 0,
+                    1e9
+            );
+            
+            String crackTimeStr = Lang.get(CRACK_LANG_BASE + ".text");
+            String[] crackTimeParts =
+                    crackTimeStr.split(CRACK_YEARS_PH + "|" + ATTEMPTS_PER_SEC_PH, -1);
+            labelsH.setText(crackTimeParts);
+            
+            final Node firstNode;
+            final Node secondNode;
+            if (crackTimeStr.indexOf(ATTEMPTS_PER_SEC_PH) < crackTimeStr.indexOf(CRACK_YEARS_PH)) {
+                firstNode = attemptsPerSecF.inputField;
+                secondNode = crackYearsNumDisplay;
+            } else {
+                firstNode = crackYearsNumDisplay;
+                secondNode = attemptsPerSecF.inputField;
+            }
+            
+            getChildren().addAll(
+                    labelsH.getLabel(0),
+                    firstNode,
+                    labelsH.getLabel(1),
+                    secondNode,
+                    labelsH.getLabel(2)
+            );
+            
+            // Dynamic
+            
+            attemptsPerSecF.valChangeNotifier.addListener(() -> {
+                updateStats();
+            });
+        }
+        
+        void update(double pwsNum) {
+            double attemptsPerSec = attemptsPerSecF.getLastValidVal();
+            double years = pwsNum / attemptsPerSec / (3600d * 24d * 365.25d);
+            crackYearsNumDisplay.setVal(years);
+        }
+        
     }
     
     void showAndWait() {

@@ -26,7 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
-public class NumberField {
+public class IntegerField {
     
     public final int minVal;
     public final int maxVal;
@@ -37,7 +37,7 @@ public class NumberField {
     public final ChangeNotifier valChangeNotifier = new ChangeNotifier();
     private int val;
     
-    public NumberField(int minVal, int maxVal, int[] btnsRelativeAdd) {
+    public IntegerField(int minVal, int maxVal, int[] btnsRelativeAdd) {
         if (minVal > maxVal) {
             throw new IllegalArgumentException("minVal > maxVal");
         }
@@ -45,7 +45,7 @@ public class NumberField {
         this.maxVal = maxVal;
         
         rootHBox = new HBox();
-        rootHBox.getStyleClass().add("number-field-root-hbox");
+        rootHBox.getStyleClass().add("integer-field-root-hbox");
         
         inputField = new TextField();
         

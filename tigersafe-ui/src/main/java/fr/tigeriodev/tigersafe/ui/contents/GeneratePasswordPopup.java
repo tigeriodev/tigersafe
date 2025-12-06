@@ -34,6 +34,7 @@ import fr.tigeriodev.tigersafe.Lang;
 import fr.tigeriodev.tigersafe.logs.Logger;
 import fr.tigeriodev.tigersafe.logs.Logs;
 import fr.tigeriodev.tigersafe.ui.UIApp;
+import fr.tigeriodev.tigersafe.ui.UIConfig;
 import fr.tigeriodev.tigersafe.ui.UIUtils;
 import fr.tigeriodev.tigersafe.ui.fields.DoubleDisplay;
 import fr.tigeriodev.tigersafe.ui.fields.DoubleField;
@@ -57,6 +58,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -172,6 +174,10 @@ public class GeneratePasswordPopup implements Destroyable {
         
         resultField = new ViewableUnclearField(new MutableString.Simple());
         HBox resultPwHBox = UIUtils.newViewableUnclearFieldHBox(resultField);
+        Button resultPwCopyBtn = UIUtils
+                .newCopyBtn(resultField, "SafeContentsUI.passwordEntry.password.copy.button");
+        HBox.setHgrow(resultPwCopyBtn, Priority.NEVER);
+        resultPwHBox.getChildren().add(resultPwCopyBtn);
         
         Button validateBtn = new Button(Lang.get(POPUP_LANG_BASE + ".result.validate.button.text"));
         
@@ -292,6 +298,12 @@ public class GeneratePasswordPopup implements Destroyable {
         cancelBtn.setOnAction((e) -> {
             stage.close();
         });
+        
+        UIUtils.setButtonShortcut(
+                scene,
+                UIConfig.KeyboardShortcut.COPY_PASSWORD.getKeyCombination(),
+                resultPwCopyBtn
+        );
         
         GlobalConfig conf = GlobalConfig.getInstance();
         minLenField.setVal(conf.getPwGenerationMinLen(), false);

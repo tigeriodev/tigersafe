@@ -33,7 +33,7 @@ import fr.tigeriodev.tigersafe.ui.UIUtils;
 import fr.tigeriodev.tigersafe.ui.contents.config.ConfigTab.ContentHolder.Section;
 import fr.tigeriodev.tigersafe.ui.fields.DirectoryField;
 import fr.tigeriodev.tigersafe.ui.fields.FieldValidityIndication;
-import fr.tigeriodev.tigersafe.ui.fields.NumberField;
+import fr.tigeriodev.tigersafe.ui.fields.IntegerField;
 import fr.tigeriodev.tigersafe.ui.fields.SecureUnclearField;
 import fr.tigeriodev.tigersafe.ui.fields.ViewableUnclearField;
 import fr.tigeriodev.tigersafe.utils.MemUtils;
@@ -58,7 +58,7 @@ class ExportSection extends Section implements Destroyable {
     final TextField serialFileNameField;
     final ComboBox<String> serialCipherBox;
     final ViewableUnclearField serialPwField;
-    final NumberField serialVerField;
+    final IntegerField serialVerField;
     final SecureUnclearField safePwField;
     final FieldValidityIndication safePwValidIndic;
     final Button exportBtn;
@@ -121,7 +121,7 @@ class ExportSection extends Section implements Destroyable {
                 true
         );
         
-        serialVerField = new NumberField(1, SafeSerializationManager.MAX_SERIAL_VER, new int[] {
+        serialVerField = new IntegerField(1, SafeSerializationManager.MAX_SERIAL_VER, new int[] {
                 -1, 1
         });
         UIUtils.addNodeToGrid(

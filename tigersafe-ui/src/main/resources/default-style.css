@@ -14,6 +14,12 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-cursor: hand;
 }
 
+.titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 1 0 -1 0, 0;
+    -fx-effect: null;
+}
+
 .invalid-field {
     -fx-focus-color: red;
     -fx-border-color: red;
@@ -38,11 +44,11 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-alignment: center;
 }
 
-.number-field-root-hbox {
+.integer-field-root-hbox {
     -fx-spacing: 10;
 }
 
-.number-field-root-hbox > .text-field {
+.integer-field-root-hbox > .text-field {
     -fx-min-width: 52;
     -fx-max-width: 52;
     -fx-pref-width: 52;
@@ -282,7 +288,7 @@ Button, CheckBox, ToggleButton, ComboBox {
 
 #safe-contents-generate-password-root-vbox {
     -fx-min-width: 550;
-    -fx-min-height: 550;
+    -fx-min-height: 625;
     -fx-alignment: center;
     -fx-spacing: 10;
     -fx-padding: 5 5 5 5;
@@ -310,6 +316,24 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-hgap: 10;
     -fx-vgap: 10;
     -fx-padding: 5 5 5 5;
+}
+
+#safe-contents-generate-password-root-vbox .stats-vbox .possibilities-hbox {
+    -fx-alignment: bottom-left;
+}
+
+#safe-contents-generate-password-root-vbox .stats-vbox .cracking-time-hbox {
+    -fx-alignment: center-left;
+}
+
+#safe-contents-generate-password-root-vbox .stats-vbox .cracking-time-hbox .double-display-root-hbox {
+    -fx-padding: 0 0 7 0;
+}
+
+#safe-contents-generate-password-root-vbox .stats-vbox .cracking-time-hbox .double-field-text-field {
+    -fx-min-width: 40;
+    -fx-pref-width: 60;
+    -fx-max-width: 100;
 }
 
 #safe-contents-generate-password-root-vbox .result-titled-pane {
@@ -347,12 +371,6 @@ Button, CheckBox, ToggleButton, ComboBox {
 
 #safe-contents-changes-root-vbox .changes-vbox {
     -fx-spacing: 10;
-}
-
-#safe-contents-changes-root-vbox .titled-pane:focused > .title > .arrow-button > .arrow {
-    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
-    -fx-background-insets: 1 0 -1 0, 0;
-    -fx-effect: null;
 }
 
 #safe-contents-changes-root-vbox .added-password-entry .password-entry-content-root,
@@ -407,12 +425,6 @@ Button, CheckBox, ToggleButton, ComboBox {
     -fx-spacing: 10;
 }
 
-#safe-contents-config-root-vbox .titled-pane:focused > .title > .arrow-button > .arrow {
-    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
-    -fx-background-insets: 1 0 -1 0, 0;
-    -fx-effect: null;
-}
-
 #safe-contents-config-root-vbox .section-titled-pane .content-root {
     -fx-alignment: top-center;
     -fx-spacing: 10;
@@ -447,12 +459,6 @@ Button, CheckBox, ToggleButton, ComboBox {
 
 #safe-contents-import-review-root-vbox .elements-vbox {
     -fx-spacing: 10;
-}
-
-#safe-contents-import-review-root-vbox .titled-pane:focused > .title > .arrow-button > .arrow {
-    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
-    -fx-background-insets: 1 0 -1 0, 0;
-    -fx-effect: null;
 }
 
 #safe-contents-import-review-root-vbox .password-entry-content-root {

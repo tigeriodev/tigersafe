@@ -102,4 +102,43 @@ public class StringUtilsTest extends TestClass {
         );
     }
     
+    @Test
+    void testStripZerosAfterSep() {
+        assertEquals("1", StringUtils.stripZerosAfterSep("1", '.'));
+        assertEquals("0.1", StringUtils.stripZerosAfterSep("0.1", '.'));
+        assertEquals("0.1", StringUtils.stripZerosAfterSep("0.10", '.'));
+        assertEquals("0.1", StringUtils.stripZerosAfterSep("0.100", '.'));
+        assertEquals("0.1002", StringUtils.stripZerosAfterSep("0.1002", '.'));
+        assertEquals("0.1002", StringUtils.stripZerosAfterSep("0.10020", '.'));
+        assertEquals("0.001", StringUtils.stripZerosAfterSep("0.001", '.'));
+        assertEquals("0.001", StringUtils.stripZerosAfterSep("0.0010", '.'));
+        assertEquals("0.001", StringUtils.stripZerosAfterSep("0.00100", '.'));
+        assertEquals("0", StringUtils.stripZerosAfterSep("0.0", '.'));
+        assertEquals("0", StringUtils.stripZerosAfterSep("0.000", '.'));
+        
+        assertEquals("63", StringUtils.stripZerosAfterSep("63", '.'));
+        assertEquals("63.1", StringUtils.stripZerosAfterSep("63.1", '.'));
+        assertEquals("63.1", StringUtils.stripZerosAfterSep("63.10", '.'));
+        assertEquals("63.1", StringUtils.stripZerosAfterSep("63.100", '.'));
+        assertEquals("63.1002", StringUtils.stripZerosAfterSep("63.1002", '.'));
+        assertEquals("63.1002", StringUtils.stripZerosAfterSep("63.10020", '.'));
+        assertEquals("63.001", StringUtils.stripZerosAfterSep("63.001", '.'));
+        assertEquals("63.001", StringUtils.stripZerosAfterSep("63.0010", '.'));
+        assertEquals("63.001", StringUtils.stripZerosAfterSep("63.00100", '.'));
+        assertEquals("63", StringUtils.stripZerosAfterSep("63.0", '.'));
+        assertEquals("63", StringUtils.stripZerosAfterSep("63.000", '.'));
+        
+        assertEquals("63", StringUtils.stripZerosAfterSep("63", ','));
+        assertEquals("63,1", StringUtils.stripZerosAfterSep("63,1", ','));
+        assertEquals("63,1", StringUtils.stripZerosAfterSep("63,10", ','));
+        assertEquals("63,1", StringUtils.stripZerosAfterSep("63,100", ','));
+        assertEquals("63,1002", StringUtils.stripZerosAfterSep("63,1002", ','));
+        assertEquals("63,1002", StringUtils.stripZerosAfterSep("63,10020", ','));
+        assertEquals("63,001", StringUtils.stripZerosAfterSep("63,001", ','));
+        assertEquals("63,001", StringUtils.stripZerosAfterSep("63,0010", ','));
+        assertEquals("63,001", StringUtils.stripZerosAfterSep("63,00100", ','));
+        assertEquals("63", StringUtils.stripZerosAfterSep("63,0", ','));
+        assertEquals("63", StringUtils.stripZerosAfterSep("63,000", ','));
+    }
+    
 }
